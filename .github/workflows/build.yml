@@ -1,0 +1,20 @@
+name: build script for quiz.c
+
+
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: build readsystem
+      run: gcc readsystem.c -o readsystem 
+      
+    - name: upload binary 
+      uses: actions/upload-artifact@v4 
+      with:
+        name: Readsystem 
+        path: ./readsystem
