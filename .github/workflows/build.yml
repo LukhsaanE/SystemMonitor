@@ -1,5 +1,5 @@
-name: Build and Run SystemMonitor
- 
+name: System Monitor CI
+
 on:
   push:
     branches:
@@ -7,34 +7,31 @@ on:
   pull_request:
     branches:
       - main
- 
+
 jobs:
   build-and-run:
-    runs-on: ubuntu-latest
- 
+    runs-on: windows-latest
+
     steps:
-      # Checkout the code
-      - name: Checkout Code
-        uses: actions/checkout@v3
- 
-      # Set up GCC (pre-installed on ubuntu-latest)
-      - name: Ensure GCC is Installed
-        run: |
-          gcc --version
- 
-      # Build the program
-      - name: Build Program
-        run: |
-          gcc -o readsystem readsystem.c
- 
-      # Run the program and redirect output
-      - name: Run Program
-        run: |
-          ./readsystem > output.txt
- 
-      # Upload the output.txt as an artifact
-      - name: Upload Output
-        uses: actions/upload-artifact@v3
-        with:
-          name: system-monitor-output
-          path: output.txt
+    # Checkout the code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Build the project
+    - name: Build the executable
+      run: gcc -o readsystem readsystem.c
+
+    # Run the executable and redirect output to a file
+    - name: Run the executable and redirect output
+      run: .\readsystem.exe > output.txt
+
+    # Upload output.txt as an artifact
+    - name: Upload output file
+      uses: actions/upload-artifact@v3
+      with:
+        name: system-monitor-output
+        path: output.txt
+
+    # Optional: Clean up the workspace
+    - name: Clean up
+      run: del readsystem.exe output.txt
