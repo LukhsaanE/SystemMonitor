@@ -1,0 +1,12 @@
+Top processes by CPU usage:
+  #   COMMAND               %CPU
+  1.  chrome.exe           15.81%
+  2.  Discord.exe          3.81%
+  3.  msedge.exe           0.98%
+  4.  cmd.exe              0.35%
+  5.  conhost.exe          0.34%
+
+Memory Usage:
+  Total RAM: 31.21 GB
+  Available RAM: 17.11 GB
+  Used RAM: 14.10 GB
