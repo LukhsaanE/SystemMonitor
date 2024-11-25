@@ -1,20 +1,40 @@
-name: build script for quiz.c
-
-
+name: Build and Run SystemMonitor
+ 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+ 
 jobs:
-  build:
+  build-and-run:
     runs-on: ubuntu-latest
+ 
     steps:
-    - uses: actions/checkout@v4
-
-    - name: build readsystem
-      run: gcc readsystem.c -o readsystem 
-      
-    - name: upload binary 
-      uses: actions/upload-artifact@v4 
-      with:
-        name: Readsystem 
-        path: ./readsystem
+      # Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+ 
+      # Set up GCC (pre-installed on ubuntu-latest)
+      - name: Ensure GCC is Installed
+        run: |
+          gcc --version
+ 
+      # Build the program
+      - name: Build Program
+        run: |
+          gcc -o readsystem readsystem.c
+ 
+      # Run the program and redirect output
+      - name: Run Program
+        run: |
+          ./readsystem > output.txt
+ 
+      # Upload the output.txt as an artifact
+      - name: Upload Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: system-monitor-output
+          path: output.txt
