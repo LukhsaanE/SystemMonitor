@@ -32,6 +32,9 @@ jobs:
         name: system-monitor-output
         path: output.txt
 
-    # Optional: Clean up the workspace
+    # Clean up the workspace
     - name: Clean up
-      run: del readsystem.exe output.txt
+      shell: pwsh
+      run: |
+        Remove-Item readsystem.exe -Force
+        Remove-Item output.txt -Force
