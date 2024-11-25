@@ -21,12 +21,22 @@ jobs:
     - name: Build the executable
       run: gcc -o readsystem readsystem.c
 
-    # Run the executable and redirect output to a file
-    - name: Run the executable and redirect output
-      run: .\readsystem.exe > output.txt
+    # Run unit tests and collect coverage
+    - name: Run Tests and Generate Coverage
+      run: |
+        gcc -fprofile-arcs -ftest-coverage -o readsystem readsystem.c
+        ./readsystem.exe > output.txt
+        gcov readsystem.c
 
-    # Upload output.txt as an artifact
-    - name: Upload output file
+    # Upload coverage report as an artifact
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: "*.gcov"
+
+    # Upload executable output as an artifact
+    - name: Upload Executable Output
       uses: actions/upload-artifact@v3
       with:
         name: system-monitor-output
@@ -38,3 +48,4 @@ jobs:
       run: |
         Remove-Item readsystem.exe -Force
         Remove-Item output.txt -Force
+        Remove-Item *.gcov -Force
