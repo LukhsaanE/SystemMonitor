@@ -37,11 +37,11 @@ jobs:
         path: gcov_report.txt
 
     # Upload executable output as an artifact
-    - name: Upload Executable Output
+    - name: Upload test Output
       uses: actions/upload-artifact@v3
       with:
-        name: system-monitor-output
-        path: output.txt
+        name: system-monitor-test
+        path: test.txt
 
     # Clean up the workspace
     - name: Clean up
