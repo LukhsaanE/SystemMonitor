@@ -9,7 +9,7 @@ SRC = main.c readsystem.c
 
 # Default target to build the executable
 $(EXEC): $(SRC)
-	$(CC) -o $(EXEC) $(SRC)
+	$(CC) -fprofile-arcs -ftest-coverage -o $(EXEC) $(SRC)
 
 # Run the program and redirect output to output.txt
 run: $(EXEC)

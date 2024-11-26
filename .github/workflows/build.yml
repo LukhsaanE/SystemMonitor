@@ -27,7 +27,7 @@ jobs:
 
     # Generate gcov report and redirect output
     - name: Generate Coverage Report
-      run: gcov readsystem.c > readsystem_gcov_report.txt
+      run: gcov -o . readsystem.c > readsystem_gcov_report.txt
        # gcov main.c > main_gcov_report.txt
        # gcov readsystem.c > readsystem_gcov_report.txt
 
