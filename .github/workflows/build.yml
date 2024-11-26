@@ -1,4 +1,4 @@
-name: System Monitor CI
+name: Build and Test Coverage
 
 on:
   push:
@@ -9,44 +9,33 @@ on:
       - main
 
 jobs:
-  build-and-run:
+  build-and-test:
     runs-on: windows-latest
 
     steps:
     # Checkout the code
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    # Build the project
-    - name: Build the executable
-      run: gcc -fprofile-arcs -ftest-coverage -o readsystem readsystem.c
-
-    # Run the executable and collect test results
-    - name: Run Tests
-      run: ./readsystem.exe > test.txt
-
-    # Generate gcov report and redirect output
-    - name: Generate Coverage Report
-      run: gcov readsystem.c > gcov_report.txt
-
-    # Upload gcov report as an artifact
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: gcov-report
-        path: gcov_report.txt
-
-    # Upload executable output as an artifact
-    - name: Upload test Output
-      uses: actions/upload-artifact@v3
-      with:
-        name: system-monitor-test
-        path: test.txt
-
-    # Clean up the workspace
-    - name: Clean up
-      shell: pwsh
+    # Install GCC
+    - name: Install GCC
       run: |
-        Remove-Item readsystem.exe -Force
-        Remove-Item output.txt -Force
-        Remove-Item gcov_report.txt -Force
+        choco install mingw
+
+    # Build with coverage
+    - name: Build with coverage
+      run: |
+        gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
+
+    # Run tests and generate coverage
+    - name: Run tests
+      run: |
+        .\readsystem
+        gcov main.c readsystem.c
+
+    # Upload coverage results
+    - name: Upload coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: "*.gcov"
