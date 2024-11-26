@@ -32,13 +32,17 @@ jobs:
         gcov readsystem.c > readsystem_gcov_report.txt
 
     # Upload gcov report as an artifact
-    - name: Upload Coverage Report
+    - name: Upload Main Coverage Report
       uses: actions/upload-artifact@v3
       with:
-        name: gcov-report
-        path: |
-          main_gcov_report.txt
-          readsystem_gcov_report.txt
+        name: main gcov-report
+        path: main_gcov_report.txt
+
+    - name: Upload readsystems Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: readsystems gcov-report
+        path: readsystem_gcov_report.txt
 
     # Upload executable output as an artifact
     - name: Upload test Output
