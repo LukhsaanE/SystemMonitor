@@ -1,4 +1,4 @@
-name: Build and Test Coverage
+name: System Monitor CI
 
 on:
   push:
@@ -9,47 +9,65 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  build-and-run:
     runs-on: windows-latest
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
+    # Checkout the code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Step 2: Install GCC
-    - name: Install GCC
-      run: choco install mingw
+    # Build the project
+    - name: Build the executable
+      run: gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
 
-    # Step 3: Build the executable with coverage enabled
-    - name: Build with coverage
+    # Run the executable and collect test results
+    - name: Run Tests
+      run: .\readsystem.exe > test.txt
+
+    # Generate gcov report and redirect output
+    - name: Generate Coverage Report
       run: |
-        gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
+        gcov main.c > main_gcov_report.txt
+        gcov readsystem.c > readsystem_gcov_report.txt
 
-    # Step 4: Run the executable to generate coverage data
-    - name: Run the executable
-      run: .\readsystem
-
-    # Step 5: Generate the gcov coverage report
-    - name: Generate coverage report
-      run: |
-        gcov main.c > main_coverage.txt
-        gcov readsystem.c > readsystem_coverage.txt
-
-    # Step 6: Upload gcov reports as artifacts
-    - name: Upload coverage reports
+    # Upload gcov report as an artifact
+    - name: Upload Coverage Report
       uses: actions/upload-artifact@v3
       with:
-        name: coverage-reports
+        name: gcov-report
         path: |
-          main_coverage.txt
-          readsystem_coverage.txt
+          main_gcov_report.txt
+          readsystem_gcov_report.txt
 
-    # Step 7: Clean up the workspace
+    # Upload executable output as an artifact
+    - name: Upload test Output
+      uses: actions/upload-artifact@v3
+      with:
+        name: system-monitor-test
+        path: test.txt
+
+#RANVIR THIS IS WHERE OUR MAKE IS 
+    # Build Window Display
+    - name: build Usage Display executable
+      run: gcc -o usage_display --coverage usage_display.c 
+    # Window display coverage report
+    - name: Generate Coverage Report
+      run: gcov usage_display-usage_display.c > gcov_DisplayReport.txt
+    # Upload gcov report as an artifact
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: gcov_DisplayReport
+        path: gcov_DisplayReport.txt
+#THIS IS WHERE IT IS STOPS
+
+    # Clean up the workspace
     - name: Clean up
+      shell: pwsh
       run: |
-        del readsystem.exe
-        del main.gcda
-        del readsystem.gcda
-        del main.gcno
-        del readsystem.gcno
+        Remove-Item readsystem.exe -Force
+        Remove-Item output.txt -Force
+        Remove-Item test.txt -Force
+        Remove-Item main_gcov_report.txt -Force
+        Remove-Item readsystem_gcov_report.txt -Force
