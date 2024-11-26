@@ -19,7 +19,7 @@ jobs:
 
     # Build the project
     - name: Build the executable
-      run: gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
+      run: gcc -fprofile-arcs -ftest -coverage -o readsystem readsystem.c
 
     # Run the executable and collect test results
     - name: Run Tests
