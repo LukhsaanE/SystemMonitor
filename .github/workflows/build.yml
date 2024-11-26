@@ -7,7 +7,8 @@ on:
   pull_request:
     branches:
       - main
-job:
+
+jobs:
   build-and-run:
     runs-on: windows-latest
 
@@ -22,7 +23,7 @@ job:
 
     # Run the executable and collect test results
     - name: Run Tests
-      run: .\readsystem.exe > test.txt
+      run: ./readsystem.exe > test.txt
 
     # Generate gcov report and redirect output
     - name: Generate Coverage Report
@@ -46,7 +47,23 @@ job:
         name: system-monitor-test
         path: test.txt
 
-     - name: Clean up
+#RANVIR THIS IS WHERE OUR MAKE IS 
+    # Build Window Display
+    - name: build Usage Display executable
+      run: gcc -o usage_display --coverage usage_display.c 
+    # Window display coverage report
+    - name: Generate Coverage Report
+      run: gcov usage_display-usage_display.c > gcov_DisplayReport.txt
+    # Upload gcov report as an artifact
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: gcov_DisplayReport
+        path: gcov_DisplayReport.txt
+#THIS IS WHERE IT IS STOPS
+
+    # Clean up the workspace
+    - name: Clean up
       shell: pwsh
       run: |
         Remove-Item readsystem.exe -Force
@@ -54,17 +71,3 @@ job:
         Remove-Item test.txt -Force
         Remove-Item main_gcov_report.txt -Force
         Remove-Item readsystem_gcov_report.txt -Force
-#RANVIR THIS IS WHERE OUR MAKE IS 
-    # Build Window Display
-    #- name: build Usage Display executable
-      #run: gcc -o usage_display --coverage usage_display.c 
-    # Window display coverage report
-    #- name: Generate Coverage Report
-    #  run: gcov usage_display-usage_display.c > gcov_DisplayReport.txt
-    # Upload gcov report as an artifact
-    #- name: Upload Coverage Report
-      #uses: actions/upload-artifact@v3
-      #with:
-        #name: gcov_DisplayReport
-#        path: gcov_DisplayReport.txt
-#THIS IS WHERE IT IS STOPS
