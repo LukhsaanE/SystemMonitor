@@ -2,6 +2,7 @@
 #include <tlhelp32.h>
 #include <stdio.h>
 #include <string.h>
+#include "readsystem.h"
 
 #define MAX_PROCESSES 1024
 
@@ -183,9 +184,4 @@ void get_top_cpu_processes() {
 
     // Print RAM usage
     printMemoryInGB();
-}
-
-int main() {
-    get_top_cpu_processes();
-    return 0;
 }
