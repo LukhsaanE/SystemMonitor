@@ -13,29 +13,43 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # Checkout the code
+    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Install GCC
+    # Step 2: Install GCC
     - name: Install GCC
-      run: |
-        choco install mingw
+      run: choco install mingw
 
-    # Build with coverage
+    # Step 3: Build the executable with coverage enabled
     - name: Build with coverage
       run: |
         gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
 
-    # Run tests and generate coverage
-    - name: Run tests
-      run: |
-        .\readsystem
-        gcov main.c readsystem.c
+    # Step 4: Run the executable to generate coverage data
+    - name: Run the executable
+      run: .\readsystem
 
-    # Upload coverage results
-    - name: Upload coverage
+    # Step 5: Generate the gcov coverage report
+    - name: Generate coverage report
+      run: |
+        gcov main.c > main_coverage.txt
+        gcov readsystem.c > readsystem_coverage.txt
+
+    # Step 6: Upload gcov reports as artifacts
+    - name: Upload coverage reports
       uses: actions/upload-artifact@v3
       with:
-        name: coverage-report
-        path: "*.gcov"
+        name: coverage-reports
+        path: |
+          main_coverage.txt
+          readsystem_coverage.txt
+
+    # Step 7: Clean up the workspace
+    - name: Clean up
+      run: |
+        del readsystem.exe
+        del main.gcda
+        del readsystem.gcda
+        del main.gcno
+        del readsystem.gcno
