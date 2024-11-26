@@ -19,26 +19,22 @@ jobs:
 
     # Build the project
     - name: Build the executable
-      run: gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
+      run: gcc -fprofile-arcs -ftest-coverage -o readsystem readsystem.c
 
     # Run the executable and collect test results
     - name: Run Tests
-      run: .\readsystem.exe > test.txt
+      run: ./readsystem.exe > test.txt
 
     # Generate gcov report and redirect output
     - name: Generate Coverage Report
-      run: |
-        gcov main.c > main_gcov_report.txt
-        gcov readsystem.c > readsystem_gcov_report.txt
+      run: gcov readsystem.c > gcov_report.txt
 
     # Upload gcov report as an artifact
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v3
       with:
         name: gcov-report
-        path: |
-          main_gcov_report.txt
-          readsystem_gcov_report.txt
+        path: gcov_report.txt
 
     # Upload executable output as an artifact
     - name: Upload test Output
@@ -46,6 +42,14 @@ jobs:
       with:
         name: system-monitor-test
         path: test.txt
+
+    # Clean up the workspace
+    - name: Clean up
+      shell: pwsh
+      run: |
+        Remove-Item readsystem.exe -Force
+        Remove-Item output.txt -Force
+        Remove-Item gcov_report.txt -Force
 
 #RANVIR THIS IS WHERE OUR MAKE IS 
     # Build Window Display
@@ -61,12 +65,3 @@ jobs:
         #name: gcov_DisplayReport
 #        path: gcov_DisplayReport.txt
 #THIS IS WHERE IT IS STOPS
-
-    # Clean up the workspace
-    - name: Clean up
-      shell: pwsh
-      run: |
-        Remove-Item readsystem.exe -Force
-        Remove-Item test.txt -Force
-        Remove-Item main_gcov_report.txt -Force
-        Remove-Item readsystem_gcov_report.txt -Force
