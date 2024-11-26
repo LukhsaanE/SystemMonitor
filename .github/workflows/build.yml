@@ -23,7 +23,7 @@ jobs:
 
     # Run the executable and collect test results
     - name: Run Tests
-      run: .\readsystem.exe > test.txt
+      run: ./readsystem.exe > test.txt
 
     # Generate gcov report and redirect output
     - name: Generate Coverage Report
