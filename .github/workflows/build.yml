@@ -7,8 +7,7 @@ on:
   pull_request:
     branches:
       - main
-
-jobs:
+job:
   build-and-run:
     runs-on: windows-latest
 
@@ -19,7 +18,7 @@ jobs:
 
     # Build the project
     - name: Build the executable
-      run: gcc -fprofile-arcs -ftest-coverage -o readsystem readsystem.c
+      run: gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
 
     # Run the executable and collect test results
     - name: Run Tests
@@ -27,14 +26,18 @@ jobs:
 
     # Generate gcov report and redirect output
     - name: Generate Coverage Report
-      run: gcov readsystem.c > gcov_report.txt
+      run: |
+        gcov main.c > main_gcov_report.txt
+        gcov readsystem.c > readsystem_gcov_report.txt
 
     # Upload gcov report as an artifact
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v3
       with:
         name: gcov-report
-        path: gcov_report.txt
+        path: |
+          main_gcov_report.txt
+          readsystem_gcov_report.txt
 
     # Upload executable output as an artifact
     - name: Upload test Output
@@ -43,14 +46,14 @@ jobs:
         name: system-monitor-test
         path: test.txt
 
-    # Clean up the workspace
-    - name: Clean up
+     - name: Clean up
       shell: pwsh
       run: |
         Remove-Item readsystem.exe -Force
         Remove-Item output.txt -Force
-        Remove-Item gcov_report.txt -Force
-
+        Remove-Item test.txt -Force
+        Remove-Item main_gcov_report.txt -Force
+        Remove-Item readsystem_gcov_report.txt -Force
 #RANVIR THIS IS WHERE OUR MAKE IS 
     # Build Window Display
     #- name: build Usage Display executable
