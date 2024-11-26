@@ -49,17 +49,17 @@ jobs:
 
 #RANVIR THIS IS WHERE OUR MAKE IS 
     # Build Window Display
-    - name: build Usage Display executable
-      run: gcc -o usage_display --coverage usage_display.c 
+    #- name: build Usage Display executable
+      #run: gcc -o usage_display --coverage usage_display.c 
     # Window display coverage report
-    - name: Generate Coverage Report
-      run: gcov usage_display-usage_display.c > gcov_DisplayReport.txt
+    #- name: Generate Coverage Report
+    #  run: gcov usage_display-usage_display.c > gcov_DisplayReport.txt
     # Upload gcov report as an artifact
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: gcov_DisplayReport
-        path: gcov_DisplayReport.txt
+    #- name: Upload Coverage Report
+      #uses: actions/upload-artifact@v3
+      #with:
+        #name: gcov_DisplayReport
+#        path: gcov_DisplayReport.txt
 #THIS IS WHERE IT IS STOPS
 
     # Clean up the workspace
@@ -68,4 +68,5 @@ jobs:
       run: |
         Remove-Item readsystem.exe -Force
         Remove-Item test.txt -Force
-        Remove-Item gcov_report.txt -Force
+        Remove-Item main_gcov_report.txt -Force
+        Remove-Item readsystem_gcov_report.txt -Force
