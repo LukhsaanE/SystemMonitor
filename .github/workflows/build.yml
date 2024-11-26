@@ -13,36 +13,55 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # Checkout the code
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Build the project
+    - name: Clean workspace
+      run: |
+        del *.gcno
+        del *.gcda
+        del readsystem.exe
+
+    - name: Check GCC and gcov versions
+      run: |
+        gcc --version
+        gcov --version
+
     - name: Build the executable
       run: gcc -fprofile-arcs -ftest-coverage -mconsole -o readsystem main.c readsystem.c
 
-    # Run the executable and collect test results
     - name: Run Tests
-      run: ./readsystem.exe > test.txt
+      run: ./readsystem.exe > test.txt || exit 1
 
-    # Generate gcov report and redirect output
+    - name: List workspace files
+      run: dir /s /b
+
     - name: Generate Coverage Report
-      run: gcov readsystem.c > gcov_report.txt
+      run: |
+        gcov main.c > gcov_main_report.txt
+        gcov readsystem.c > gcov_report.txt
 
-    # Upload gcov report as an artifact
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v3
       with:
         name: gcov-report
-        path: gcov_report.txt
+        path: |
+          gcov_main_report.txt
+          gcov_report.txt
 
-    # Upload executable output as an artifact
     - name: Upload Executable Output
       uses: actions/upload-artifact@v3
       with:
         name: system-monitor-output
         path: test.txt
 
+    - name: Clean up
+      shell: pwsh
+      run: |
+        Remove-Item readsystem.exe -Force
+        Remove-Item test.txt -Force
+        Remove-Item gcov_report.txt -Force
+        Remove-Item gcov_main_report.txt -Force
 #RANVIR THIS IS WHERE OUR MAKE IS 
     # Build Window Display
     - name: build Usage Display executable
