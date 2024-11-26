@@ -21,12 +21,6 @@ jobs:
     - name: Build the executable
       run: gcc -fprofile-arcs -ftest-coverage -o readsystem main.c readsystem.c 
 
-    - name: Print Current Directory
-      run: pwd
-
-    - name: List Files After Build
-      run: dir
-
     # Run the executable and collect test results
     - name: Run Tests
       run: ./readsystem.exe > test.txt
@@ -52,21 +46,6 @@ jobs:
       with:
         name: system-monitor-test
         path: test.txt
-
-#RANVIR THIS IS WHERE OUR MAKE IS 
-    # Build Window Display
-    - name: build Usage Display executable
-      run: gcc -o usage_display --coverage usage_display.c 
-    # Window display coverage report
-    - name: Generate Coverage Report
-      run: gcov usage_display-usage_display.c > gcov_DisplayReport.txt
-    # Upload gcov report as an artifact
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: gcov_DisplayReport
-        path: gcov_DisplayReport.txt
-#THIS IS WHERE IT IS STOPS
 
     # Clean up the workspace
     - name: Clean up
