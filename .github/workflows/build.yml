@@ -27,9 +27,7 @@ jobs:
 
     # Generate gcov report and redirect output
     - name: Generate Coverage Report
-      run: |
-        gcov main.c > main_gcov_report.txt
-        gcov readsystem.c > readsystem_gcov_report.txt
+      run: gcov readsystem.c > readsystem_gcov_report.txt
 
     - name: Upload readsystems Coverage Report
       uses: actions/upload-artifact@v3
