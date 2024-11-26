@@ -28,8 +28,8 @@ jobs:
     # Generate gcov report and redirect output
     - name: Generate Coverage Report
       run: |
-        gcov -o .main.c > main_gcov_report.txt
-        gcov -o . readsystem.c > readsystem_gcov_report.txt
+        gcov main.c > main_gcov_report.txt
+        gcov readsystem.c > readsystem_gcov_report.txt
 
     # Upload gcov report as an artifact
     - name: Upload Coverage Report
