@@ -33,8 +33,3 @@ all: $(TARGET)
 $(TARGET): $(SRC2)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-# Clean rule
-clean:
-	rm -f $(TARGET)
-
-
