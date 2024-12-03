@@ -13,11 +13,13 @@ static void print_help (GtkWidget *widget, gpointer   data)
 }
 
 // Simulated usage update function
-void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4, GtkWidget *label5) {
+void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4,GtkWidget *label5,
+GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkWidget *label10) {
+
     FILE *file;
     char buffer[MAX_LINE];
-    GtkWidget *labels[] = {label1, label2, label3, label4, label5};
-    int target_lines[] = {6, 7, 8, 9, 10}; // Target lines for each label
+    GtkWidget *labels[] = {label1, label2, label3, label4, label5, label6, label7, label8, label9, label10};
+    int target_lines[] = {1,2,3,4,5,6, 7, 8, 9, 10}; // Target lines for each label
     int current_line = 0;
     int target_index = 0;
 
@@ -44,7 +46,7 @@ void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWi
 
             // Move to the next target line
             target_index++;
-            if (target_index >= 5) {
+            if (target_index >= 10) {
                 break; // Exit if all labels have been updated
             }
         }
@@ -69,7 +71,9 @@ gboolean on_update_data(gpointer data) {
     if (!labels) return FALSE;
 
     // Update the usage labels
-    update_usage(labels[0], labels[1], labels[2], labels[3], labels[4]);
+    update_usage(labels[0], labels[1], labels[2], labels[3], labels[4],labels[5], labels[6], labels[7], labels[8], labels[9]);
+
+
 
     return TRUE;
 }
@@ -78,6 +82,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window, *grid;
     GtkWidget *App1, *App2, *App3, *App4, *App5, *Total;
     GtkWidget *CPU_App1, *CPU_App2, *CPU_App3, *CPU_App4, *CPU_App5;
+    GtkWidget *GPU_App1, *GPU_App2, *GPU_App3, *GPU_App4, *GPU_App5;
+    GtkWidget *RAM_App1, *RAM_App2, *RAM_App3, *RAM_App4, *RAM_App5;
+
     GtkWidget *CPU, *GPU, *RAM, *Battery, *Spacer;
     GtkWidget *button;
 
@@ -96,9 +103,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
     App3 = gtk_label_new("\nApp 3\t");
     App4 = gtk_label_new("\nApp 4\t");
     App5 = gtk_label_new("\nApp 5\t");
+
     Total = gtk_label_new("\nTotal Usage\t");
     CPU = gtk_label_new("\nCPU Usage\t");
-    GPU = gtk_label_new("\nRam Usage\t");
+    GPU = gtk_label_new("\nGPU Usage\t");
     RAM = gtk_label_new("\nRam Usage\t");
     Battery = gtk_label_new("\nBattery Usage\t");
     Spacer = gtk_label_new("\n\t");
@@ -109,6 +117,19 @@ static void activate(GtkApplication *app, gpointer user_data) {
     CPU_App4 = gtk_label_new("0%");
     CPU_App5 = gtk_label_new("0%");
 
+    GPU_App1 = gtk_label_new("0%");
+    GPU_App2 = gtk_label_new("0%");
+    GPU_App3 = gtk_label_new("0%");
+    GPU_App4 = gtk_label_new("0%");
+    GPU_App5 = gtk_label_new("0%");
+
+    RAM_App1 = gtk_label_new("0%");
+    RAM_App2 = gtk_label_new("0%");
+    RAM_App3 = gtk_label_new("0%");
+    RAM_App4 = gtk_label_new("0%");
+    RAM_App5 = gtk_label_new("0%");
+
+
     //Creates and labels the help button
     button = gtk_button_new_with_label("Help");
     g_signal_connect (button,"clicked",G_CALLBACK(print_help), NULL);
@@ -116,21 +137,34 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     // Attach widgets to the grid
     gtk_grid_attach(GTK_GRID(grid), App1, 1, 1, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), CPU_App1, 2, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), App2, 1, 2, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), CPU_App2, 2, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), App3, 1, 3, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), CPU_App3, 2, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), App4, 1, 4, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), CPU_App4, 2, 4, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), App5, 1, 5, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), CPU_App5, 2, 5, 1, 1);
 
     gtk_grid_attach(GTK_GRID(grid), CPU, 2,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), GPU, 3,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), RAM, 4,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), Battery, 5,0,1,1);
-    gtk_grid_attach(GTK_GRID(grid), Spacer, 6,0,1,1);
+    gtk_grid_attach(GTK_GRID(grid), Spacer, 6,0,1,1);    
+
+    gtk_grid_attach(GTK_GRID(grid), CPU_App1, 2, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), CPU_App2, 2, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), CPU_App3, 2, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), CPU_App4, 2, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), CPU_App5, 2, 5, 1, 1);
+
+    gtk_grid_attach(GTK_GRID(grid), GPU_App1, 3, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), GPU_App2, 3, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), GPU_App3, 3, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), GPU_App4, 3, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), GPU_App5, 3, 5, 1, 1);
+
+    gtk_grid_attach(GTK_GRID(grid), RAM_App1, 4, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), RAM_App2, 4, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), RAM_App3, 4, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), RAM_App4, 4, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), RAM_App5, 4, 5, 1, 1);
 
     gtk_grid_attach(GTK_GRID(grid), button, 0,0,1,1);
 
@@ -138,12 +172,18 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_set_child(GTK_WINDOW(window), grid);
 
     // Create labels array on the heap
-    GtkWidget **labels = g_new(GtkWidget *, 5);
-    labels[0] = CPU_App1;
-    labels[1] = CPU_App2;
-    labels[2] = CPU_App3;
-    labels[3] = CPU_App4;
-    labels[4] = CPU_App5;
+    GtkWidget **labels = g_new(GtkWidget *, 10);
+    labels[0] = App1;
+    labels[1] = App2;
+    labels[2] = App3;
+    labels[3] = App4;
+    labels[4] = App5;
+    labels[5] = CPU_App1;
+    labels[6] = CPU_App2;
+    labels[7] = CPU_App3;
+    labels[8] = CPU_App4;
+    labels[9] = CPU_App5;
+    
 
     // Schedule periodic updates
     g_timeout_add(1000, on_update_data, labels);
@@ -163,4 +203,3 @@ int main(int argc, char **argv) {
 
     return status;
 }
-
