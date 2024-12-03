@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
-
+#define FILENAME_SIZE 1024
+#define MAX_LINE 2048
+#include <stdbool.h>
 //Prints the --help statement to the console.
 static void print_help (GtkWidget *widget, gpointer   data)
 { 
@@ -12,34 +14,46 @@ static void print_help (GtkWidget *widget, gpointer   data)
 
 // Simulated usage update function
 void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4, GtkWidget *label5) {
-    char buffer[20];
-    int usage;
+	FILE *file;
+	char filename[FILENAME_SIZE];
+    char buffer[MAX_LINE];
+    char *usage;
+    int read_line = 0;
+    file = fopen("testing.txt", "r");
+    if (file == NULL){
+	    printf("Error Opening File.\n");
+    }
+   bool keep_reading = true;
+  int current_line = 1;
+ 
 
     if (label1) {
-        usage = rand() % 101;
-        snprintf(buffer, sizeof(buffer), "%d%%", usage);
+	read_line = 6;
+        usage = fgets(buffer, MAX_LINE, file);
+        snprintf(buffer, sizeof(buffer), "%s%%", usage);
         gtk_label_set_text(GTK_LABEL(label1), buffer);
     }
     if (label2) {
-        usage = rand() % 101;
-        snprintf(buffer, sizeof(buffer), "%d%%", usage);
+        usage = "hello";
+        snprintf(buffer, sizeof(buffer), "%s%%", usage);
         gtk_label_set_text(GTK_LABEL(label2), buffer);
     }
     if (label3) {
-        usage = rand() % 101;
-        snprintf(buffer, sizeof(buffer), "%d%%", usage);
+        usage = "hello";
+        snprintf(buffer, sizeof(buffer), "%s%%", usage);
         gtk_label_set_text(GTK_LABEL(label3), buffer);
     }
     if (label4) {
-        usage = rand() % 101;
-        snprintf(buffer, sizeof(buffer), "%d%%", usage);
+        usage = "hello";
+        snprintf(buffer, sizeof(buffer), "%s%%", usage);
         gtk_label_set_text(GTK_LABEL(label4), buffer);
     }
     if (label5) {
-        usage = rand() % 101;
-        snprintf(buffer, sizeof(buffer), "%d%%", usage);
+        usage = "hello";
+        snprintf(buffer, sizeof(buffer), "%s%%", usage);
         gtk_label_set_text(GTK_LABEL(label5), buffer);
     }
+    fclose(file);
 }
 
 gboolean on_update_data(gpointer data) {
