@@ -14,47 +14,53 @@ static void print_help (GtkWidget *widget, gpointer   data)
 
 // Simulated usage update function
 void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4, GtkWidget *label5) {
-	FILE *file;
-	char filename[FILENAME_SIZE];
+    FILE *file;
     char buffer[MAX_LINE];
-    char *usage;
-    int read_line = 0;
-    file = fopen("testing.txt", "r");
-    if (file == NULL){
-	    printf("Error Opening File.\n");
-    }
-   bool keep_reading = true;
-  int current_line = 1;
- 
+    GtkWidget *labels[] = {label1, label2, label3, label4, label5};
+    int target_lines[] = {6, 7, 8, 9, 10}; // Target lines for each label
+    int current_line = 0;
+    int target_index = 0;
 
-    if (label1) {
-	read_line = 6;
-        usage = fgets(buffer, MAX_LINE, file);
-        snprintf(buffer, sizeof(buffer), "%s%%", usage);
-        gtk_label_set_text(GTK_LABEL(label1), buffer);
+    // Open the file
+    file = fopen("testing.txt", "r");
+    if (file == NULL) {
+        printf("Error Opening File.\n");
+        return;
     }
-    if (label2) {
-        usage = "hello";
-        snprintf(buffer, sizeof(buffer), "%s%%", usage);
-        gtk_label_set_text(GTK_LABEL(label2), buffer);
+
+    // Iterate through the file line by line
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
+        current_line++;
+
+        // Check if the current line matches any target line
+        if (current_line == target_lines[target_index]) {
+            // Remove trailing newline if present
+            buffer[strcspn(buffer, "\n")] = '\0';
+
+            // Update the corresponding label if it exists
+            if (labels[target_index]) {
+                gtk_label_set_text(GTK_LABEL(labels[target_index]), buffer);
+            }
+
+            // Move to the next target line
+            target_index++;
+            if (target_index >= 5) {
+                break; // Exit if all labels have been updated
+            }
+        }
     }
-    if (label3) {
-        usage = "hello";
-        snprintf(buffer, sizeof(buffer), "%s%%", usage);
-        gtk_label_set_text(GTK_LABEL(label3), buffer);
-    }
-    if (label4) {
-        usage = "hello";
-        snprintf(buffer, sizeof(buffer), "%s%%", usage);
-        gtk_label_set_text(GTK_LABEL(label4), buffer);
-    }
-    if (label5) {
-        usage = "hello";
-        snprintf(buffer, sizeof(buffer), "%s%%", usage);
-        gtk_label_set_text(GTK_LABEL(label5), buffer);
-    }
+
+    // Close the file
     fclose(file);
+
+    // Set remaining labels to a default value if no corresponding line exists
+    for (int i = target_index; i < 5; i++) {
+        if (labels[i]) {
+            gtk_label_set_text(GTK_LABEL(labels[i]), "N/A");
+        }
+    }
 }
+
 
 gboolean on_update_data(gpointer data) {
     GtkWidget **labels = (GtkWidget **)data;
