@@ -3,5 +3,6 @@
 
 void get_top_cpu_processes();
 void printMemoryInGB();
+void print_battery_status();
 
 #endif
