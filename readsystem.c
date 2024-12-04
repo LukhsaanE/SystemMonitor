@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <stdio.h>
+#include <psapi.h>
 #include <string.h>
 #include "readsystem.h"
 
@@ -9,6 +10,7 @@
 typedef struct {
     char name[MAX_PATH];
     double totalCpuUsage;
+    SIZE_T memoryUsage; // RAM usage in bytes
 } CombinedProcess;
 
 typedef struct {
@@ -17,9 +19,9 @@ typedef struct {
     double cpuUsage;
 } ProcessInfo;
 
-int compare(const void* a, const void* b) {
-    double cpuA = ((CombinedProcess*)a)->totalCpuUsage;
-    double cpuB = ((CombinedProcess*)b)->totalCpuUsage;
+int compare(const void *a, const void *b) {
+    double cpuA = ((CombinedProcess *)a)->totalCpuUsage;
+    double cpuB = ((CombinedProcess *)b)->totalCpuUsage;
     return (cpuB > cpuA) - (cpuB < cpuA); // Descending order
 }
 
@@ -36,21 +38,17 @@ int get_number_of_cores() {
     return sysInfo.dwNumberOfProcessors;
 }
 
-void printMemoryInGB() {
-    MEMORYSTATUSEX statex;
-    statex.dwLength = sizeof(statex);
-    if (GlobalMemoryStatusEx(&statex)) {
-        double totalGB = statex.ullTotalPhys / (1024.0 * 1024.0 * 1024.0);
-        double availableGB = statex.ullAvailPhys / (1024.0 * 1024.0 * 1024.0);
-        double usedGB = totalGB - availableGB;
-
-        printf("\nMemory Usage:\n");
-        printf("  Total RAM: %.2f GB\n", totalGB);
-        printf("  Available RAM: %.2f GB\n", availableGB);
-        printf("  Used RAM: %.2f GB\n", usedGB);
-    } else {
-        printf("Error retrieving memory information.\n");
+SIZE_T get_process_memory_usage(DWORD pid) {
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+    if (hProcess && GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS *)&pmc, sizeof(pmc))) {
+        CloseHandle(hProcess);
+        return pmc.WorkingSetSize; // Return memory usage in bytes
     }
+    if (hProcess) {
+        CloseHandle(hProcess);
+    }
+    return 0; // If unable to get memory usage
 }
 
 void get_top_cpu_processes() {
@@ -61,6 +59,16 @@ void get_top_cpu_processes() {
     ProcessInfo processes[MAX_PROCESSES];
     CombinedProcess combined[MAX_PROCESSES];
     int processCount = 0, combinedCount = 0;
+
+    double totalCPUUsage = 0.0; // Initialize total CPU usage
+
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof(statex);
+    GlobalMemoryStatusEx(&statex);
+
+    double totalRAM = (double)statex.ullTotalPhys;
+    double availableRAM = (double)statex.ullAvailPhys;
+    double usedRAMPercentage = ((totalRAM - availableRAM) / totalRAM) * 100.0;
 
     int numCores = get_number_of_cores();
 
@@ -160,6 +168,7 @@ void get_top_cpu_processes() {
             for (int j = 0; j < combinedCount; j++) {
                 if (strcmp(processes[i].name, combined[j].name) == 0) {
                     combined[j].totalCpuUsage += processes[i].cpuUsage;
+                    combined[j].memoryUsage += get_process_memory_usage(processes[i].pid); // Sum memory usage
                     found = 1;
                     break;
                 }
@@ -167,6 +176,8 @@ void get_top_cpu_processes() {
             if (!found && combinedCount < MAX_PROCESSES) {
                 strncpy(combined[combinedCount].name, processes[i].name, MAX_PATH);
                 combined[combinedCount].totalCpuUsage = processes[i].cpuUsage;
+                combined[combinedCount].memoryUsage = get_process_memory_usage(processes[i].pid);
+                totalCPUUsage += processes[i].cpuUsage;
                 combinedCount++;
             }
         }
@@ -175,13 +186,29 @@ void get_top_cpu_processes() {
     // Sort combined processes by total CPU usage
     qsort(combined, combinedCount, sizeof(CombinedProcess), compare);
 
-    // Print top 5 processes by CPU usage
-    printf("Top processes by CPU usage:\n");
-    printf("  #   COMMAND               %%CPU\n");
+    // Print output in requested format
+    printf("%.2f%%\n", totalCPUUsage);
+
     for (int i = 0; i < combinedCount && i < 5; i++) {
-        printf("  %d.  %-20s %.2f%%\n", i + 1, combined[i].name, combined[i].totalCpuUsage);
+        printf("%s\n", combined[i].name);
     }
 
-    // Print RAM usage
-    printMemoryInGB();
+    for (int i = 0; i < combinedCount && i < 5; i++) {
+        printf("%.2f%%\n", combined[i].totalCpuUsage);
+    }
+
+    for (int i = 0; i < combinedCount && i < 5; i++) {
+        printf("%.2f MB\n", combined[i].memoryUsage / (1024.0 * 1024.0));
+    }
+
+    printf("%.2f%%\n", usedRAMPercentage);
+}
+
+void print_battery_status() {
+    SYSTEM_POWER_STATUS status;
+    if (GetSystemPowerStatus(&status)) {
+        printf("%d%%\n", status.BatteryLifePercent);
+    } else {
+        printf("Error retrieving battery status.\n");
+    }
 }
