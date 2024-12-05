@@ -3,6 +3,8 @@
 #define FILENAME_SIZE 1024
 #define MAX_LINE 2048
 #include <stdbool.h>
+#include <readsystem.h>
+
 //Prints the --help statement to the console.
 static void print_help (GtkWidget *widget)
 { 
@@ -16,12 +18,15 @@ static void print_help (GtkWidget *widget)
 
 // Simulated usage update function
 void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4,GtkWidget *label5,
-GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkWidget *label10) {
+GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkWidget *label10,
+GtkWidget *label11, GtkWidget *label12, GtkWidget *label13, GtkWidget *label14, GtkWidget *label15, GtkWidget *label16, GtkWidget *label17,
+GtkWidget *label18) {
 
     FILE *file;
     char buffer[MAX_LINE];
-    GtkWidget *labels[] = {label1, label2, label3, label4, label5, label6, label7, label8, label9, label10};
-    int target_lines[] = {1,2, 3, 4, 5, 6, 7, 8, 9, 10}; // Target lines for each label
+    GtkWidget *labels[] = {label1, label2, label3, label4, label5, label6, label7, label8, label9, 
+    label10, label11, label12, label13, label14, label15, label16, label17, label18};
+    int target_lines[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}; // Target lines for each label
     int current_line = 0;
     int target_index = 0;
 
@@ -42,13 +47,12 @@ GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkW
 
             // Update the corresponding label if it exists
             if (labels[target_index]) {
-
                 gtk_label_set_text(GTK_LABEL(labels[target_index]), buffer);
             }
 
             // Move to the next target line
             target_index++;
-            if (target_index >= 10) {
+            if (target_index >= 18) {
                 break; // Exit if all labels have been updated
             }
         }
@@ -73,9 +77,8 @@ gboolean on_update_data(gpointer data) {
     if (!labels) return FALSE;
 
     // Update the usage labels
-    update_usage(labels[0], labels[1], labels[2], labels[3], labels[4],labels[5], labels[6], labels[7], labels[8], labels[9]);
-
-
+    update_usage(labels[0], labels[1], labels[2], labels[3], labels[4],labels[5], labels[6], labels[7], labels[8], labels[9],
+    labels[10], labels[11], labels[12], labels[13], labels[14], labels[15], labels[16], labels[17]);
 
     return TRUE;
 }
@@ -85,15 +88,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *App1, *App2, *App3, *App4, *App5, *Total;
     GtkWidget *CPU_App1, *CPU_App2, *CPU_App3, *CPU_App4, *CPU_App5;
     GtkWidget *RAM_App1, *RAM_App2, *RAM_App3, *RAM_App4, *RAM_App5;
-
     GtkWidget *CPU, *RAM, *Battery, *Spacer;
     GtkWidget *button;
+    GtkWidget *TotalCPU, *TotalRAM;
 
 
     // Create the main application window
     window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "System Monitor");
-    gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 400);
 
     // Create a grid layout
     grid = gtk_grid_new();
@@ -104,6 +107,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     App3 = gtk_label_new("\nApp 3");
     App4 = gtk_label_new("\nApp 4");
     App5 = gtk_label_new("\nApp 5");
+    Total = gtk_label_new("\nTotal Usage");
 
     Total = gtk_label_new("\nTotal Usage\t");
     CPU = gtk_label_new("\nCPU Usage\t");
@@ -116,18 +120,21 @@ static void activate(GtkApplication *app, gpointer user_data) {
     CPU_App3 = gtk_label_new("0%");
     CPU_App4 = gtk_label_new("0%");
     CPU_App5 = gtk_label_new("0%");
+    TotalCPU = gtk_label_new("0%");
+
 
     RAM_App1 = gtk_label_new("0%");
     RAM_App2 = gtk_label_new("0%");
     RAM_App3 = gtk_label_new("0%");
     RAM_App4 = gtk_label_new("0%");
     RAM_App5 = gtk_label_new("0%");
+    TotalRAM = gtk_label_new("0%");
+
 
 
     //Creates and labels the help button
     button = gtk_button_new_with_label("Help");
     g_signal_connect (button,"clicked",G_CALLBACK(print_help), NULL);
-
 
     // Attach widgets to the grid
     gtk_grid_attach(GTK_GRID(grid), App1, 1, 1, 1, 1);
@@ -135,6 +142,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_grid_attach(GTK_GRID(grid), App3, 1, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), App4, 1, 4, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), App5, 1, 5, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), Total, 1, 6, 1, 1);
 
     gtk_grid_attach(GTK_GRID(grid), CPU, 2,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), RAM, 4,0,1,1);
@@ -146,12 +154,16 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_grid_attach(GTK_GRID(grid), CPU_App3, 2, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), CPU_App4, 2, 4, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), CPU_App5, 2, 5, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), TotalCPU, 2, 6, 1, 1);
+
 
     gtk_grid_attach(GTK_GRID(grid), RAM_App1, 4, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), RAM_App2, 4, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), RAM_App3, 4, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), RAM_App4, 4, 4, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), RAM_App5, 4, 5, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), TotalRAM, 4, 6, 1, 1);
+
 
     gtk_grid_attach(GTK_GRID(grid), button, 0,0,1,1);
 
@@ -159,7 +171,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_set_child(GTK_WINDOW(window), grid);
 
     // Create labels array on the heap
-    GtkWidget **labels = g_new(GtkWidget *, 10);
+    GtkWidget **labels = g_new(GtkWidget *, 18);
     labels[0] = App1;
     labels[1] = App2;
     labels[2] = App3;
@@ -170,7 +182,16 @@ static void activate(GtkApplication *app, gpointer user_data) {
     labels[7] = CPU_App3;
     labels[8] = CPU_App4;
     labels[9] = CPU_App5;
-    
+    labels[10] = RAM_App1;
+    labels[11] = RAM_App2;
+    labels[12] = RAM_App3;
+    labels[13] = RAM_App4;
+    labels[14] = RAM_App5;
+    labels[15] = TotalCPU;
+    labels[16] = TotalRAM;
+    labels[17] = Total;
+
+    get_top_cpu_processes();
 
     // Schedule periodic updates
     g_timeout_add(1000, on_update_data, labels);
