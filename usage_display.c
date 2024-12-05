@@ -20,13 +20,13 @@ static void print_help (GtkWidget *widget)
 void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4,GtkWidget *label5,
 GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkWidget *label10,
 GtkWidget *label11, GtkWidget *label12, GtkWidget *label13, GtkWidget *label14, GtkWidget *label15, GtkWidget *label16, GtkWidget *label17,
-GtkWidget *label18) {
+GtkWidget *label18, GtkWidget *label19, GtkWidget *label20) {
 
     FILE *file;
     char buffer[MAX_LINE];
     GtkWidget *labels[] = {label1, label2, label3, label4, label5, label6, label7, label8, label9, 
-    label10, label11, label12, label13, label14, label15, label16, label17, label18};
-    int target_lines[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}; // Target lines for each label
+    label10, label11, label12, label13, label14, label15, label16, label17, label18, label19, label20};
+    int target_lines[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}; // Target lines for each label
     int current_line = 0;
     int target_index = 0;
 
@@ -52,7 +52,7 @@ GtkWidget *label18) {
 
             // Move to the next target line
             target_index++;
-            if (target_index >= 18) {
+            if (target_index >= 20) {
                 break; // Exit if all labels have been updated
             }
         }
@@ -60,7 +60,6 @@ GtkWidget *label18) {
 
     // Close the file
     fclose(file);
-
     // Set remaining labels to a default value if no corresponding line exists
     for (int i = target_index; i < 5; i++) {
         if (labels[i]) {
@@ -78,25 +77,25 @@ gboolean on_update_data(gpointer data) {
 
     // Update the usage labels
     update_usage(labels[0], labels[1], labels[2], labels[3], labels[4],labels[5], labels[6], labels[7], labels[8], labels[9],
-    labels[10], labels[11], labels[12], labels[13], labels[14], labels[15], labels[16], labels[17]);
+    labels[10], labels[11], labels[12], labels[13], labels[14], labels[15], labels[16], labels[17], labels[18], labels[19]);
 
     return TRUE;
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window, *grid;
-    GtkWidget *App1, *App2, *App3, *App4, *App5, *Total;
+    GtkWidget *App1, *App2, *App3, *App4, *App5, *Total, *Battery;
     GtkWidget *CPU_App1, *CPU_App2, *CPU_App3, *CPU_App4, *CPU_App5;
     GtkWidget *RAM_App1, *RAM_App2, *RAM_App3, *RAM_App4, *RAM_App5;
-    GtkWidget *CPU, *RAM, *Battery, *Spacer;
+    GtkWidget *CPU, *RAM, *Spacer;
     GtkWidget *button;
-    GtkWidget *TotalCPU, *TotalRAM;
+    GtkWidget *TotalCPU, *TotalRAM, *BatteryPercent;
 
 
     // Create the main application window
     window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "System Monitor");
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 400);
+    gtk_window_set_default_size(GTK_WINDOW(window), 500, 500);
 
     // Create a grid layout
     grid = gtk_grid_new();
@@ -108,11 +107,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
     App4 = gtk_label_new("\nApp 4");
     App5 = gtk_label_new("\nApp 5");
     Total = gtk_label_new("\nTotal Usage");
+    Battery = gtk_label_new("\nBattery");
 
-    Total = gtk_label_new("\nTotal Usage\t");
     CPU = gtk_label_new("\nCPU Usage\t");
     RAM = gtk_label_new("\nRam Usage\t");
-    Battery = gtk_label_new("\nBattery Usage\t");
     Spacer = gtk_label_new("\n\t");
 
     CPU_App1 = gtk_label_new("0%");
@@ -129,6 +127,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     RAM_App4 = gtk_label_new("0%");
     RAM_App5 = gtk_label_new("0%");
     TotalRAM = gtk_label_new("0%");
+    BatteryPercent = gtk_label_new("0%");
 
 
 
@@ -143,10 +142,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_grid_attach(GTK_GRID(grid), App4, 1, 4, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), App5, 1, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), Total, 1, 6, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), Battery, 1, 7, 1, 1);
 
     gtk_grid_attach(GTK_GRID(grid), CPU, 2,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), RAM, 4,0,1,1);
-    gtk_grid_attach(GTK_GRID(grid), Battery, 5,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), Spacer, 6,0,1,1);    
 
     gtk_grid_attach(GTK_GRID(grid), CPU_App1, 2, 1, 1, 1);
@@ -163,6 +162,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_grid_attach(GTK_GRID(grid), RAM_App4, 4, 4, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), RAM_App5, 4, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), TotalRAM, 4, 6, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), BatteryPercent, 2, 7, 1, 1);
+
 
 
     gtk_grid_attach(GTK_GRID(grid), button, 0,0,1,1);
@@ -171,7 +172,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_set_child(GTK_WINDOW(window), grid);
 
     // Create labels array on the heap
-    GtkWidget **labels = g_new(GtkWidget *, 18);
+    GtkWidget **labels = g_new(GtkWidget *, 20);
     labels[0] = App1;
     labels[1] = App2;
     labels[2] = App3;
@@ -190,6 +191,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
     labels[15] = TotalCPU;
     labels[16] = TotalRAM;
     labels[17] = Total;
+    labels[18] = Battery;
+    labels[19] = BatteryPercent;
 
     get_top_cpu_processes();
 
