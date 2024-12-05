@@ -4,13 +4,15 @@
 #define MAX_LINE 2048
 #include <stdbool.h>
 //Prints the --help statement to the console.
-static void print_help (GtkWidget *widget, gpointer   data)
+static void print_help (GtkWidget *widget)
 { 
   g_print("System Monitoring Tool v0.1.0\n");
   g_print ("This application displays the system percent usage of the top 5 appliations currently running\n");
   g_print ("Usage: ./hello\n");
   g_print ("This application requires no arguments. It gets all needed data directly from the system.\n");
 }
+
+
 
 // Simulated usage update function
 void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4,GtkWidget *label5,
@@ -19,7 +21,7 @@ GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkW
     FILE *file;
     char buffer[MAX_LINE];
     GtkWidget *labels[] = {label1, label2, label3, label4, label5, label6, label7, label8, label9, label10};
-    int target_lines[] = {1,2,3,4,5,6, 7, 8, 9, 10}; // Target lines for each label
+    int target_lines[] = {1,2, 3, 4, 5, 6, 7, 8, 9, 10}; // Target lines for each label
     int current_line = 0;
     int target_index = 0;
 
@@ -36,11 +38,11 @@ GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkW
 
         // Check if the current line matches any target line
         if (current_line == target_lines[target_index]) {
-            // Remove trailing newline if present
-            buffer[strcspn(buffer, "\n")] = '\0';
+
 
             // Update the corresponding label if it exists
             if (labels[target_index]) {
+
                 gtk_label_set_text(GTK_LABEL(labels[target_index]), buffer);
             }
 
@@ -82,10 +84,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window, *grid;
     GtkWidget *App1, *App2, *App3, *App4, *App5, *Total;
     GtkWidget *CPU_App1, *CPU_App2, *CPU_App3, *CPU_App4, *CPU_App5;
-    GtkWidget *GPU_App1, *GPU_App2, *GPU_App3, *GPU_App4, *GPU_App5;
     GtkWidget *RAM_App1, *RAM_App2, *RAM_App3, *RAM_App4, *RAM_App5;
 
-    GtkWidget *CPU, *GPU, *RAM, *Battery, *Spacer;
+    GtkWidget *CPU, *RAM, *Battery, *Spacer;
     GtkWidget *button;
 
 
@@ -98,15 +99,14 @@ static void activate(GtkApplication *app, gpointer user_data) {
     grid = gtk_grid_new();
 
     // Create labels
-    App1 = gtk_label_new("\nApp 1\t");
-    App2 = gtk_label_new("\nApp 2\t");
-    App3 = gtk_label_new("\nApp 3\t");
-    App4 = gtk_label_new("\nApp 4\t");
-    App5 = gtk_label_new("\nApp 5\t");
+    App1 = gtk_label_new("\nApp 1");
+    App2 = gtk_label_new("\nApp 2");
+    App3 = gtk_label_new("\nApp 3");
+    App4 = gtk_label_new("\nApp 4");
+    App5 = gtk_label_new("\nApp 5");
 
     Total = gtk_label_new("\nTotal Usage\t");
     CPU = gtk_label_new("\nCPU Usage\t");
-    GPU = gtk_label_new("\nGPU Usage\t");
     RAM = gtk_label_new("\nRam Usage\t");
     Battery = gtk_label_new("\nBattery Usage\t");
     Spacer = gtk_label_new("\n\t");
@@ -116,12 +116,6 @@ static void activate(GtkApplication *app, gpointer user_data) {
     CPU_App3 = gtk_label_new("0%");
     CPU_App4 = gtk_label_new("0%");
     CPU_App5 = gtk_label_new("0%");
-
-    GPU_App1 = gtk_label_new("0%");
-    GPU_App2 = gtk_label_new("0%");
-    GPU_App3 = gtk_label_new("0%");
-    GPU_App4 = gtk_label_new("0%");
-    GPU_App5 = gtk_label_new("0%");
 
     RAM_App1 = gtk_label_new("0%");
     RAM_App2 = gtk_label_new("0%");
@@ -143,7 +137,6 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_grid_attach(GTK_GRID(grid), App5, 1, 5, 1, 1);
 
     gtk_grid_attach(GTK_GRID(grid), CPU, 2,0,1,1);
-    gtk_grid_attach(GTK_GRID(grid), GPU, 3,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), RAM, 4,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), Battery, 5,0,1,1);
     gtk_grid_attach(GTK_GRID(grid), Spacer, 6,0,1,1);    
@@ -153,12 +146,6 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_grid_attach(GTK_GRID(grid), CPU_App3, 2, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), CPU_App4, 2, 4, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), CPU_App5, 2, 5, 1, 1);
-
-    gtk_grid_attach(GTK_GRID(grid), GPU_App1, 3, 1, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), GPU_App2, 3, 2, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), GPU_App3, 3, 3, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), GPU_App4, 3, 4, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), GPU_App5, 3, 5, 1, 1);
 
     gtk_grid_attach(GTK_GRID(grid), RAM_App1, 4, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), RAM_App2, 4, 2, 1, 1);
