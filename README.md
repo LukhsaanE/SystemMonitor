@@ -7,6 +7,9 @@ This app tracks CPU usage, RAM usage, and the battery life remaining on your com
 - **Battery Life**: Shows the remaining battery life.
 
 ## How to use
+- Download the files needed in the Installation Needed
+- Open the command prompt and run the commmand `make usage_display`
+- Run `./`
 
 ### Example usage
 
@@ -18,5 +21,6 @@ The following needs to be downloaded be able to use the app.
 ## Testing the app
 - The app could not be conventially tested with specific inputs and outputs, as the outpus are constantly changing.
 - The way we decided to test it is matching up the specific stats with the task manager for Windows. 
-- This way we could find out if the outputs were actually accurate. 
+- This way we could find out if the outputs were actually accurate.
+- https://github.com/user-attachments/assets/16ddadbd-50b9-4c89-bd27-191805f6c51b
 
