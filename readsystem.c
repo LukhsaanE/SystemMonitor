@@ -51,7 +51,7 @@ SIZE_T get_process_memory_usage(DWORD pid) {
     return 0; // If unable to get memory usage
 }
 
-void get_top_cpu_processes() {
+void get_top_processes(FILE *file) {
     HANDLE hProcessSnap;
     PROCESSENTRY32 pe32;
     FILETIME idleTime, kernelTime, userTime, prevIdleTime, prevKernelTime, prevUserTime;
@@ -59,6 +59,11 @@ void get_top_cpu_processes() {
     ProcessInfo processes[MAX_PROCESSES];
     CombinedProcess combined[MAX_PROCESSES];
     int processCount = 0, combinedCount = 0;
+    file = fopen("output.txt", "w");
+    if (file == NULL) {
+        printf("Error: Could not open file for writing.\n");
+    } 
+
 
     double totalCPUUsage = 0.0; // Initialize total CPU usage
 
@@ -187,27 +192,35 @@ void get_top_cpu_processes() {
     qsort(combined, combinedCount, sizeof(CombinedProcess), compare);
 
     // Print output in requested format
-    printf("%.2f%%\n", totalCPUUsage);
 
     for (int i = 0; i < combinedCount && i < 5; i++) {
-        printf("%s\n", combined[i].name);
+       fprintf(file, "%s\n", combined[i].name);
     }
 
     for (int i = 0; i < combinedCount && i < 5; i++) {
-        printf("%.2f%%\n", combined[i].totalCpuUsage);
+        fprintf(file, "%.2f%%\n", combined[i].totalCpuUsage);
     }
 
     for (int i = 0; i < combinedCount && i < 5; i++) {
-        printf("%.2f MB\n", combined[i].memoryUsage / (1024.0 * 1024.0));
+        fprintf(file, "%.2f MB\n", combined[i].memoryUsage / (1024.0 * 1024.0));
     }
+    fprintf(file, "%.2f%%\n", totalCPUUsage);
+    fprintf(file, "%.2f%%\n", usedRAMPercentage);
 
-    printf("%.2f%%\n", usedRAMPercentage);
+    fprintf(file, "Total Usage\n");
+
+    fprintf(file, "Battery Life\n");
+
+    print_battery_status(file);
+
+    fclose(file);
+    
 }
 
-void print_battery_status() {
+void print_battery_status(FILE *file) {
     SYSTEM_POWER_STATUS status;
     if (GetSystemPowerStatus(&status)) {
-        printf("%d%%\n", status.BatteryLifePercent);
+        fprintf(file, "%d%%\n", status.BatteryLifePercent);
     } else {
         printf("Error retrieving battery status.\n");
     }
