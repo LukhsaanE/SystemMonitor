@@ -93,16 +93,16 @@ void get_top_processes(FILE *file) {
     HANDLE hProcessSnap;
     PROCESSENTRY32 pe32;
     
-    //sotre CPU times 
+    //store CPU times 
     FILETIME idleTime, kernelTime, userTime, prevIdleTime, prevKernelTime, prevUserTime;
     FILETIME prevProcKernelTime[MAX_PROCESSES], prevProcUserTime[MAX_PROCESSES];
 
-    //Aeeays to store individual and agrragated process datas
+    //arrays to store individual and agrragated process datas
     ProcessInfo processes[MAX_PROCESSES];
     CombinedProcess combined[MAX_PROCESSES];
     int processCount = 0, combinedCount = 0;
 
-    //Open the file for writing info
+    //open the file for writing info
     file = fopen("output.txt", "w");
     if (file == NULL) {
         printf("Error: Could not open file for writing.\n");
@@ -163,8 +163,8 @@ void get_top_processes(FILE *file) {
     } while (Process32Next(hProcessSnap, &pe32));
     CloseHandle(hProcessSnap);
 
-    // Take a second snapshot for per-process CPU usage calculation
-    Sleep(1000); // Allow time for per-process sampling
+    // take a second snapshot for per-process CPU usage calculation
+    Sleep(1000); // allow time for per-process sampling
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (!Process32First(hProcessSnap, &pe32)) {
         CloseHandle(hProcessSnap);
@@ -194,18 +194,18 @@ void get_top_processes(FILE *file) {
                 currSysKernel = filetime_to_uli(kernelTime);
                 currSysUser = filetime_to_uli(userTime);
 
-                // Calculate deltas
+                //calculate deltas
                 ULONGLONG procTimeDelta = (currKernel.QuadPart - prevKernel.QuadPart) +
                                           (currUser.QuadPart - prevUser.QuadPart);
                 ULONGLONG sysTimeDelta = (currSysKernel.QuadPart - prevSysKernel.QuadPart) +
                                          (currSysUser.QuadPart - prevSysUser.QuadPart);
 
-                // Validate deltas
+                //validate deltas
                 if (procTimeDelta > sysTimeDelta || sysTimeDelta == 0 || procTimeDelta > 10 * sysTimeDelta) {
                     // Invalid delta: skip this process
                     processes[i].cpuUsage = 0.0;
                 } else {
-                    // Normalize CPU usage
+                    //normalize CPU usage
                     processes[i].cpuUsage = (100.0 * procTimeDelta) / (sysTimeDelta * numCores);
                 }
             }
@@ -215,7 +215,7 @@ void get_top_processes(FILE *file) {
     } while (Process32Next(hProcessSnap, &pe32));
     CloseHandle(hProcessSnap);
 
-    // Combine processes with the same name and aggregate CPU and memory usage.
+    //combine processes with the same name and aggregate CPU and memory usage.
     for (int i = 0; i < processCount; i++) {
         if (processes[i].cpuUsage > 0) { // Ignore invalid processes
             int found = 0;
@@ -237,14 +237,14 @@ void get_top_processes(FILE *file) {
         }
     }
 
-    // Sort combined processes by total CPU usage
+    //sort combined processes by total CPU usage
     qsort(combined, combinedCount, sizeof(CombinedProcess), compare);
 
-    // Print output in requested format
+    //print output in requested format
     for (int i = 0; i < combinedCount && i < 5; i++) {
        fprintf(file, "%s\n", combined[i].name);
     }
-    //Write the top 5 processes and system statistics to the output file.
+    //write the top 5 processes and system statistics to the output file.
     for (int i = 0; i < combinedCount && i < 5; i++) {
         fprintf(file, "%.2f%%\n", combined[i].totalCpuUsage);
     }
