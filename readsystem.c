@@ -19,12 +19,25 @@ typedef struct {
     double cpuUsage;
 } ProcessInfo;
 
+/* copmare
+* Parameters: 
+* const void *a: Pointer to the first element to compare.
+* const void *b: Pointer to the second element to compare.
+* Return values:  Integer value that determines the relative order of two CombinedProcess structures
+* Description: Sorts CombinedProcess structs in descending order of their totalCpuUsage
+*/
 int compare(const void *a, const void *b) {
+    //total cpu usage from combinedProcess structs
     double cpuA = ((CombinedProcess *)a)->totalCpuUsage;
     double cpuB = ((CombinedProcess *)b)->totalCpuUsage;
     return (cpuB > cpuA) - (cpuB < cpuA); // Descending order
 }
 
+/* filetime_to_uli
+ * Parameters: FILETIME ft: struct containing timestamp 
+ * Return values: struct combining low and high parts of FILETIME
+ * Description: Converts a `FILETIME` struct into a ULARGE_INTEGER manipulation of time values
+ */
 ULARGE_INTEGER filetime_to_uli(FILETIME ft) {
     ULARGE_INTEGER uli;
     uli.LowPart = ft.dwLowDateTime;
@@ -32,25 +45,46 @@ ULARGE_INTEGER filetime_to_uli(FILETIME ft) {
     return uli;
 }
 
+/* get_number_of_cores
+ * Return values: integer of logical processors
+ * Description: Retrieves the number of logical processors on the system
+ */
 int get_number_of_cores() {
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
     return sysInfo.dwNumberOfProcessors;
 }
 
+/* get_process_memory_usage
+ * Parameters: Process ID whose memory usage is to be retrieved
+ * Return values: memory usage of app in bytes
+ * Description: Gets memory usage or RAM  of an app based off its PID number
+ */
 SIZE_T get_process_memory_usage(DWORD pid) {
     PROCESS_MEMORY_COUNTERS_EX pmc;
+
+    //opening the target process and reading memory
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+
+    //if the process is opened return
     if (hProcess && GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS *)&pmc, sizeof(pmc))) {
         CloseHandle(hProcess);
-        return pmc.WorkingSetSize; // Return memory usage in bytes
+
+         // return memory usage in bytes
+        return pmc.WorkingSetSize;
     }
+    //if process handle is vlaid close it
     if (hProcess) {
         CloseHandle(hProcess);
     }
-    return 0; // If unable to get memory usage
+    // if unable to get memory usage
+    return 0; 
 }
 
+/* get_process_memory_usage
+ * Parameters: Process ID whose memory usage is to be retrieved
+ * Description: Gets memory usage or RAM  of an app based off its PID number
+ */
 void get_top_processes(FILE *file) {
     HANDLE hProcessSnap;
     PROCESSENTRY32 pe32;
@@ -64,8 +98,8 @@ void get_top_processes(FILE *file) {
         printf("Error: Could not open file for writing.\n");
     } 
 
-
-    double totalCPUUsage = 0.0; // Initialize total CPU usage
+    // Initialize total CPU usage
+    double totalCPUUsage = 0.0; 
 
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(statex);
