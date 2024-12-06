@@ -1,3 +1,7 @@
+/* Lukhsaan (elankuml), Jodh (gillj118), Date: December 5, 2024
+*
+* This program prints the top 5 app that use the most RAM and CPU, gives their stats and prints the battery life of the computer
+*/
 #include <windows.h>
 #include <tlhelp32.h>
 #include <stdio.h>
@@ -82,33 +86,42 @@ SIZE_T get_process_memory_usage(DWORD pid) {
 }
 
 /* get_process_memory_usage
- * Parameters: Process ID whose memory usage is to be retrieved
- * Description: Gets memory usage or RAM  of an app based off its PID number
+ * Parameters: File pointer used for writing the process info to an output file
+ * Description: Collects CPU and RAM  statistics, aggregates the data and sorts them by CPU usage and 
  */
 void get_top_processes(FILE *file) {
     HANDLE hProcessSnap;
     PROCESSENTRY32 pe32;
+    
+    //sotre CPU times 
     FILETIME idleTime, kernelTime, userTime, prevIdleTime, prevKernelTime, prevUserTime;
     FILETIME prevProcKernelTime[MAX_PROCESSES], prevProcUserTime[MAX_PROCESSES];
+
+    //Aeeays to store individual and agrragated process datas
     ProcessInfo processes[MAX_PROCESSES];
     CombinedProcess combined[MAX_PROCESSES];
     int processCount = 0, combinedCount = 0;
+
+    //Open the file for writing info
     file = fopen("output.txt", "w");
     if (file == NULL) {
         printf("Error: Could not open file for writing.\n");
     } 
 
-    // Initialize total CPU usage
+    //initialize total CPU usage
     double totalCPUUsage = 0.0; 
 
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(statex);
     GlobalMemoryStatusEx(&statex);
 
+    //calculate total and available RAM in bytes 
     double totalRAM = (double)statex.ullTotalPhys;
     double availableRAM = (double)statex.ullAvailPhys;
+    //percentage of used RAM
     double usedRAMPercentage = ((totalRAM - availableRAM) / totalRAM) * 100.0;
 
+    //number of cpu cores
     int numCores = get_number_of_cores();
 
     // Take an initial system CPU snapshot
@@ -116,14 +129,15 @@ void get_top_processes(FILE *file) {
     Sleep(1000); // Allow time for sampling
     GetSystemTimes(&idleTime, &kernelTime, &userTime);
 
+    //snapshot of all processes in the system
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
         printf("Failed to create process snapshot\n");
         return;
     }
-
     pe32.dwSize = sizeof(PROCESSENTRY32);
 
+    //retrieve the first proceess in snapshot
     if (!Process32First(hProcessSnap, &pe32)) {
         printf("Failed to retrieve process list\n");
         CloseHandle(hProcessSnap);
@@ -137,8 +151,9 @@ void get_top_processes(FILE *file) {
             FILETIME createTime, exitTime, procKernelTime, procUserTime;
             if (GetProcessTimes(hProcess, &createTime, &exitTime, &procKernelTime, &procUserTime)) {
                 processes[processCount].pid = pe32.th32ProcessID;
+                //store process name
                 strncpy(processes[processCount].name, pe32.szExeFile, MAX_PATH);
-
+                //store initial kernel and times
                 prevProcKernelTime[processCount] = procKernelTime;
                 prevProcUserTime[processCount] = procUserTime;
                 processCount++;
@@ -165,7 +180,7 @@ void get_top_processes(FILE *file) {
                 ULARGE_INTEGER prevKernel, prevUser, currKernel, currUser;
                 ULARGE_INTEGER prevSysIdle, prevSysKernel, prevSysUser, currSysIdle, currSysKernel, currSysUser;
 
-                // Convert FILETIME to ULARGE_INTEGER
+                //convert FILETIME to ULARGE_INTEGER for claclations
                 prevKernel = filetime_to_uli(prevProcKernelTime[i]);
                 prevUser = filetime_to_uli(prevProcUserTime[i]);
                 currKernel = filetime_to_uli(procKernelTime);
@@ -200,7 +215,7 @@ void get_top_processes(FILE *file) {
     } while (Process32Next(hProcessSnap, &pe32));
     CloseHandle(hProcessSnap);
 
-    // Combine processes with the same name
+    // Combine processes with the same name and aggregate CPU and memory usage.
     for (int i = 0; i < processCount; i++) {
         if (processes[i].cpuUsage > 0) { // Ignore invalid processes
             int found = 0;
@@ -226,36 +241,37 @@ void get_top_processes(FILE *file) {
     qsort(combined, combinedCount, sizeof(CombinedProcess), compare);
 
     // Print output in requested format
-
     for (int i = 0; i < combinedCount && i < 5; i++) {
        fprintf(file, "%s\n", combined[i].name);
     }
-
+    //Write the top 5 processes and system statistics to the output file.
     for (int i = 0; i < combinedCount && i < 5; i++) {
         fprintf(file, "%.2f%%\n", combined[i].totalCpuUsage);
     }
-
     for (int i = 0; i < combinedCount && i < 5; i++) {
         fprintf(file, "%.2f MB\n", combined[i].memoryUsage / (1024.0 * 1024.0));
     }
+    
+    //totals
     fprintf(file, "%.2f%%\n", totalCPUUsage);
     fprintf(file, "%.2f%%\n", usedRAMPercentage);
-
     fprintf(file, "Total Usage\n");
-
     fprintf(file, "Battery Life\n");
-
     print_battery_status(file);
-
-    fclose(file);
-    
+    //close output file
+    fclose(file);    
 }
 
+/* print_battery_status
+ * Parameters: File pointer used for writing the process info to an output file
+ * Description: Write battery life to file
+ */
 void print_battery_status(FILE *file) {
     SYSTEM_POWER_STATUS status;
+    //retrieve current battery
     if (GetSystemPowerStatus(&status)) {
         fprintf(file, "%d%%\n", status.BatteryLifePercent);
-    } else {
+    } else { //if it cant be retrieved
         printf("Error retrieving battery status.\n");
     }
 }
