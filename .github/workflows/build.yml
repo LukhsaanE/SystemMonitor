@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v3
 
     # Install MSYS2 and GTK dependencies
-    - name: Setup MSYS2 and GTK
+    - name: Setup MSYS2 and Install GTK
       uses: msys2/setup-msys2@v2
       with:
         update: true
@@ -28,13 +28,13 @@ jobs:
           mingw-w64-x86_64-pkg-config
         msystem: mingw64
 
-    # Add MSYS2 paths to the environment
-    - name: Add MSYS2 to PATH
+    # Ensure MSYS2 is prioritized in PATH
+    - name: Update PATH for MSYS2
       run: |
         echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
         echo "C:/msys64/usr/bin" >> $GITHUB_PATH
 
-    # Build the main system executable
+    # Build the readsystem executable
     - name: Build readsystem executable
       shell: bash
       run: gcc -fprofile-arcs -ftest-coverage -o readsystem main.c readsystem.c
@@ -43,9 +43,9 @@ jobs:
     - name: Build usage_display executable
       shell: bash
       run: |
-        gcc $(pkg-config --cflags gtk4) usage_display.c readsystem.c $(pkg-config --libs gtk4) -o usage_display
+        gcc $(/c/msys64/mingw64/bin/pkg-config --cflags gtk4) usage_display.c readsystem.c $(/c/msys64/mingw64/bin/pkg-config --libs gtk4) -o usage_display
 
-    # Test usage_display by checking if the GUI window opens
+    # Test usage_display by ensuring the GUI opens
     - name: Test usage_display GUI
       shell: bash
       run: |
@@ -53,7 +53,7 @@ jobs:
         sleep 5
         tasklist | grep usage_display.exe || exit 1
 
-    # Run the readsystem executable and collect output
+    # Run readsystem executable and collect output
     - name: Run readsystem Tests
       shell: bash
       run: ./readsystem.exe > test_readsystem.txt
@@ -68,7 +68,7 @@ jobs:
 
     # Upload gcov report as an artifact
     - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: gcov-report
         path: |
@@ -76,9 +76,9 @@ jobs:
           readsystem_gcov_report.txt
           usage_display_gcov_report.txt
 
-    # Upload executable outputs as artifacts
+    # Upload test outputs as artifacts
     - name: Upload Test Outputs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: system-monitor-test
         path: |
