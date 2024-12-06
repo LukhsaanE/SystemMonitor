@@ -9,14 +9,17 @@
 #include <string.h>
 #include "readsystem.h"
 
+//max number of processes program handles
 #define MAX_PROCESSES 1024
 
+//represents app with its name and total cpu usage and memory usage in bytes
 typedef struct {
-    char name[MAX_PATH];
-    double totalCpuUsage;
+    char name[MAX_PATH];    //app name
+    double totalCpuUsage;       //cpu usage percentage 
     SIZE_T memoryUsage; // RAM usage in bytes
 } CombinedProcess;
 
+//represents individual apps and cpu usage
 typedef struct {
     DWORD pid;
     char name[MAX_PATH];
@@ -51,7 +54,7 @@ ULARGE_INTEGER filetime_to_uli(FILETIME ft) {
 
 /* get_number_of_cores
  * Return values: integer of logical processors
- * Description: Retrieves the number of logical processors on the system
+ * Description: Retrieves the number of logical processes on the system
  */
 int get_number_of_cores() {
     SYSTEM_INFO sysInfo;
@@ -60,24 +63,24 @@ int get_number_of_cores() {
 }
 
 /* get_process_memory_usage
- * Parameters: Process ID whose memory usage is to be retrieved
+ * Parameters: app ID whose memory usage is to be retrieved
  * Return values: memory usage of app in bytes
- * Description: Gets memory usage or RAM  of an app based off its PID number
+ * Description: Gets memory usage or RAM of an app based off its PID number
  */
 SIZE_T get_process_memory_usage(DWORD pid) {
     PROCESS_MEMORY_COUNTERS_EX pmc;
 
-    //opening the target process and reading memory
+    //opening the target app and reading memory
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
 
-    //if the process is opened return
+    //if the app is opened return
     if (hProcess && GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS *)&pmc, sizeof(pmc))) {
         CloseHandle(hProcess);
 
          // return memory usage in bytes
         return pmc.WorkingSetSize;
     }
-    //if process handle is vlaid close it
+    //if app handle is caaid close it
     if (hProcess) {
         CloseHandle(hProcess);
     }
@@ -86,7 +89,7 @@ SIZE_T get_process_memory_usage(DWORD pid) {
 }
 
 /* get_process_memory_usage
- * Parameters: File pointer used for writing the process info to an output file
+ * Parameters: File pointer used for writing the app info to an output file
  * Description: Collects CPU and RAM  statistics, aggregates the data and sorts them by CPU usage and 
  */
 void get_top_processes(FILE *file) {
@@ -97,7 +100,7 @@ void get_top_processes(FILE *file) {
     FILETIME idleTime, kernelTime, userTime, prevIdleTime, prevKernelTime, prevUserTime;
     FILETIME prevProcKernelTime[MAX_PROCESSES], prevProcUserTime[MAX_PROCESSES];
 
-    //arrays to store individual and agrragated process datas
+    //arrays to store individual and agrragated app datas
     ProcessInfo processes[MAX_PROCESSES];
     CombinedProcess combined[MAX_PROCESSES];
     int processCount = 0, combinedCount = 0;
@@ -129,7 +132,7 @@ void get_top_processes(FILE *file) {
     Sleep(1000); // Allow time for sampling
     GetSystemTimes(&idleTime, &kernelTime, &userTime);
 
-    //snapshot of all processes in the system
+    //snapshot of all apps in the system
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
         printf("Failed to create process snapshot\n");
@@ -137,7 +140,7 @@ void get_top_processes(FILE *file) {
     }
     pe32.dwSize = sizeof(PROCESSENTRY32);
 
-    //retrieve the first proceess in snapshot
+    //retrieve the first app in snapshot
     if (!Process32First(hProcessSnap, &pe32)) {
         printf("Failed to retrieve process list\n");
         CloseHandle(hProcessSnap);
@@ -151,7 +154,7 @@ void get_top_processes(FILE *file) {
             FILETIME createTime, exitTime, procKernelTime, procUserTime;
             if (GetProcessTimes(hProcess, &createTime, &exitTime, &procKernelTime, &procUserTime)) {
                 processes[processCount].pid = pe32.th32ProcessID;
-                //store process name
+                //store app name
                 strncpy(processes[processCount].name, pe32.szExeFile, MAX_PATH);
                 //store initial kernel and times
                 prevProcKernelTime[processCount] = procKernelTime;
@@ -163,8 +166,8 @@ void get_top_processes(FILE *file) {
     } while (Process32Next(hProcessSnap, &pe32));
     CloseHandle(hProcessSnap);
 
-    // take a second snapshot for per-process CPU usage calculation
-    Sleep(1000); // allow time for per-process sampling
+    // take a second snapshot for per-app CPU usage calculation
+    Sleep(1000); // allow time for per-app sampling
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (!Process32First(hProcessSnap, &pe32)) {
         CloseHandle(hProcessSnap);
@@ -180,7 +183,7 @@ void get_top_processes(FILE *file) {
                 ULARGE_INTEGER prevKernel, prevUser, currKernel, currUser;
                 ULARGE_INTEGER prevSysIdle, prevSysKernel, prevSysUser, currSysIdle, currSysKernel, currSysUser;
 
-                //convert FILETIME to ULARGE_INTEGER for claclations
+                //convert FILETIME to ULARGE_INTEGER for calclations
                 prevKernel = filetime_to_uli(prevProcKernelTime[i]);
                 prevUser = filetime_to_uli(prevProcUserTime[i]);
                 currKernel = filetime_to_uli(procKernelTime);
@@ -202,7 +205,7 @@ void get_top_processes(FILE *file) {
 
                 //validate deltas
                 if (procTimeDelta > sysTimeDelta || sysTimeDelta == 0 || procTimeDelta > 10 * sysTimeDelta) {
-                    // Invalid delta: skip this process
+                    // Invalid delta: skip this app
                     processes[i].cpuUsage = 0.0;
                 } else {
                     //normalize CPU usage
@@ -215,7 +218,7 @@ void get_top_processes(FILE *file) {
     } while (Process32Next(hProcessSnap, &pe32));
     CloseHandle(hProcessSnap);
 
-    //combine processes with the same name and aggregate CPU and memory usage.
+    //combine apps with the same name and aggregate CPU and memory usage.
     for (int i = 0; i < processCount; i++) {
         if (processes[i].cpuUsage > 0) { // Ignore invalid processes
             int found = 0;
@@ -237,14 +240,14 @@ void get_top_processes(FILE *file) {
         }
     }
 
-    //sort combined processes by total CPU usage
+    //sort combined apps by total CPU usage
     qsort(combined, combinedCount, sizeof(CombinedProcess), compare);
 
     //print output in requested format
     for (int i = 0; i < combinedCount && i < 5; i++) {
        fprintf(file, "%s\n", combined[i].name);
     }
-    //write the top 5 processes and system statistics to the output file.
+    //write the top 5 apps and system statistics to the output file.
     for (int i = 0; i < combinedCount && i < 5; i++) {
         fprintf(file, "%.2f%%\n", combined[i].totalCpuUsage);
     }
@@ -263,7 +266,7 @@ void get_top_processes(FILE *file) {
 }
 
 /* print_battery_status
- * Parameters: File pointer used for writing the process info to an output file
+ * Parameters: File pointer used for writing the app info to an output file
  * Description: Write battery life to file
  */
 void print_battery_status(FILE *file) {
