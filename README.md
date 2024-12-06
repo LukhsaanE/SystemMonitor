@@ -7,6 +7,7 @@ This app tracks CPU usage, RAM usage, and the battery life remaining on your com
 - **Battery Life**: Shows the remaining battery life.
 
 ## How to use
+- Note: Only works for Windows
 - Download the files needed in the Installation Needed.
 - Download the repo.
 - Open the command prompt and run the commmand `make` and `./readSystem --help`.
