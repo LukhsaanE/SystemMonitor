@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v3
 
     # Install MSYS2 and GTK dependencies
-    - name: Setup MSYS2 and Install GTK
+    - name: Setup MSYS2 and Install Dependencies
       uses: msys2/setup-msys2@v2
       with:
         update: true
@@ -30,22 +30,22 @@ jobs:
 
     # Ensure MSYS2 is prioritized in PATH
     - name: Update PATH for MSYS2
-      run: |
-        echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
-        echo "C:/msys64/usr/bin" >> $GITHUB_PATH
+      run: echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
 
     # Verify gcc and pkg-config availability
-    - name: Verify gcc and pkg-config
+    - name: Verify Tools
       run: |
-        which gcc
-        which pkg-config
+        gcc --version
+        pkg-config --version
+        pkg-config --cflags gtk4
+        pkg-config --libs gtk4
 
-    # Build the readsystem executable
+    # Build readsystem executable
     - name: Build readsystem executable
       shell: bash
       run: gcc -fprofile-arcs -ftest-coverage -o readsystem main.c readsystem.c
 
-    # Build the usage_display executable
+    # Build usage_display executable
     - name: Build usage_display executable
       shell: bash
       run: |
@@ -74,7 +74,7 @@ jobs:
 
     # Upload gcov report as an artifact
     - name: Upload Coverage Report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: gcov-report
         path: |
@@ -84,20 +84,8 @@ jobs:
 
     # Upload test outputs as artifacts
     - name: Upload Test Outputs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: system-monitor-test
         path: |
           test_readsystem.txt
-
-    # Clean up the workspace
-    - name: Clean up
-      shell: pwsh
-      run: |
-        Remove-Item readsystem.exe -Force
-        Remove-Item usage_display.exe -Force
-        Remove-Item output.txt -Force
-        Remove-Item test_readsystem.txt -Force
-        Remove-Item main_gcov_report.txt -Force
-        Remove-Item readsystem_gcov_report.txt -Force
-        Remove-Item usage_display_gcov_report.txt -Force
