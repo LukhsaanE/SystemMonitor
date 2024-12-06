@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v3
 
     # Install MSYS2 and GTK dependencies
-    - name: Setup MSYS2 and Install Dependencies
+    - name: Setup MSYS2 and Install GTK
       uses: msys2/setup-msys2@v2
       with:
         update: true
@@ -30,15 +30,34 @@ jobs:
 
     # Ensure MSYS2 is prioritized in PATH
     - name: Update PATH for MSYS2
-      run: echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
+      run: |
+        echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
+        echo "C:/msys64/usr/bin" >> $GITHUB_PATH
+
+    # Set PKG_CONFIG_PATH for pkg-config
+    - name: Set PKG_CONFIG_PATH
+      run: echo "C:/msys64/mingw64/lib/pkgconfig" >> $GITHUB_ENV
 
     # Verify gcc and pkg-config availability
-    - name: Verify Tools
+    - name: Debugging pkg-config and GTK4 Setup
       run: |
+        echo "Checking GCC version:"
         gcc --version
+
+        echo "Checking pkg-config version:"
         pkg-config --version
-        pkg-config --cflags gtk4
-        pkg-config --libs gtk4
+
+        echo "Checking pkg-config paths:"
+        echo $PKG_CONFIG_PATH
+
+        echo "Checking gtk4.pc location:"
+        ls C:/msys64/mingw64/lib/pkgconfig/
+
+        echo "Checking GTK4 CFLAGS:"
+        pkg-config --cflags gtk4 || echo "Error retrieving cflags"
+
+        echo "Checking GTK4 LIBS:"
+        pkg-config --libs gtk4 || echo "Error retrieving libs"
 
     # Build readsystem executable
     - name: Build readsystem executable
@@ -74,7 +93,7 @@ jobs:
 
     # Upload gcov report as an artifact
     - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: gcov-report
         path: |
@@ -84,8 +103,20 @@ jobs:
 
     # Upload test outputs as artifacts
     - name: Upload Test Outputs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: system-monitor-test
         path: |
           test_readsystem.txt
+
+    # Clean up the workspace
+    - name: Clean up
+      shell: pwsh
+      run: |
+        Remove-Item readsystem.exe -Force
+        Remove-Item usage_display.exe -Force
+        Remove-Item output.txt -Force
+        Remove-Item test_readsystem.txt -Force
+        Remove-Item main_gcov_report.txt -Force
+        Remove-Item readsystem_gcov_report.txt -Force
+        Remove-Item usage_display_gcov_report.txt -Force
