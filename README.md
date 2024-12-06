@@ -8,10 +8,11 @@ This app tracks CPU usage, RAM usage, and the battery life remaining on your com
 
 ## How to use
 - Download the files needed in the Installation Needed
-- Open the command prompt and run the commmand `make usage_display`
-- Run `./`
-
+- Open the command prompt and run the commmand `make` and `./readSystem --help`
+- Run `make usage_display` then run the command `./usage_display`
+  
 ### Example usage
+https://github.com/Sam-Scott-McMaster/the-team-assignment-team-39/issues/1#issue-2721735276
 
 ## Installations Needed
 The following needs to be downloaded be able to use the app. 
