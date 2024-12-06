@@ -1,3 +1,12 @@
+/*
+This c program displays the computers CPU, RAM usage of the top 5 applications and the battery percentage of the system for a windows computer.
+This uses GTK4 to display a graphic user interface.
+
+Ranvir Jhajj, jhajjr1, 400524715
+Garrick Wong, wongg36, 400518507
+*/
+
+
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #define FILENAME_SIZE 1024
@@ -6,6 +15,7 @@
 #include "readsystem.h"
 
 //Prints the --help statement to the console.
+//Takes widget as the parameter and prints the help statement
 static void print_help (GtkWidget *widget)
 { 
   g_print("System Monitoring Tool v0.1.0\n");
@@ -17,6 +27,9 @@ static void print_help (GtkWidget *widget)
 
 
 // Simulated usage update function
+// This function takes parameters for all the labels that require updating
+// Runs the get_top_processes(file) function to write into the output.txt file with all the needed data
+// Updates all the labels from the file
 void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWidget *label4,GtkWidget *label5,
 GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkWidget *label10,
 GtkWidget *label11, GtkWidget *label12, GtkWidget *label13, GtkWidget *label14, GtkWidget *label15, GtkWidget *label16, GtkWidget *label17,
@@ -68,7 +81,8 @@ GtkWidget *label18, GtkWidget *label19, GtkWidget *label20) {
     }
 }
 
-
+//This functoin takes the gpointer data as the parameter and assigns it to the labels array
+//Then runs update_usage() with all the labels.
 gboolean on_update_data(gpointer data) {
     GtkWidget **labels = (GtkWidget **)data;
 
@@ -81,6 +95,12 @@ gboolean on_update_data(gpointer data) {
 
     return TRUE;
 }
+
+//Takes parameter for the application and data.
+//Initializes all the labels and buttons needed for the GUI
+//Attaches everything to the grid to form the layout
+//Assigns each index in labels array to the corresponding label to be run in update_usage()
+//It then runs the on_update() using g_timeout_add which runs it every 2100 ms (2.1 seconds)
 
 static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window, *grid;
@@ -201,6 +221,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
 }
 
+//starts the app and allows the rest of the functions to run
+//takes argv and argc as arguments
+//returns status of the application
 int main(int argc, char **argv) {
     GtkApplication *app;
     int status;
