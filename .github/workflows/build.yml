@@ -26,7 +26,7 @@ jobs:
 
     # Add MSYS2 paths to PATH environment variable
     - name: Add MSYS2 to PATH
-      run: echo "::add-path::C:/msys64/ucrt64/bin"
+      run: echo "C:/msys64/ucrt64/bin" >> $GITHUB_ENV
 
     # Checkout the code
     - name: Checkout repository
@@ -61,7 +61,7 @@ jobs:
             -lharfbuzz -lgdk_pixbuf-2.0 -lcairo-gobject -lcairo \
             -lgraphene-1.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lintl
 
-    # Check if usage_display executable launches
+    # Test if the usage_display executable runs
     - name: Test usage_display launch
       shell: bash
       run: |
