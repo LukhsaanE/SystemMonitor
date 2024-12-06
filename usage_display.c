@@ -3,7 +3,7 @@
 #define FILENAME_SIZE 1024
 #define MAX_LINE 2048
 #include <stdbool.h>
-#include <readsystem.h>
+#include "readsystem.h"
 
 //Prints the --help statement to the console.
 static void print_help (GtkWidget *widget)
@@ -21,8 +21,8 @@ void update_usage(GtkWidget *label1, GtkWidget *label2, GtkWidget *label3, GtkWi
 GtkWidget *label6, GtkWidget *label7, GtkWidget *label8, GtkWidget *label9, GtkWidget *label10,
 GtkWidget *label11, GtkWidget *label12, GtkWidget *label13, GtkWidget *label14, GtkWidget *label15, GtkWidget *label16, GtkWidget *label17,
 GtkWidget *label18, GtkWidget *label19, GtkWidget *label20) {
-
     FILE *file;
+    get_top_processes(file);
     char buffer[MAX_LINE];
     GtkWidget *labels[] = {label1, label2, label3, label4, label5, label6, label7, label8, label9, 
     label10, label11, label12, label13, label14, label15, label16, label17, label18, label19, label20};
@@ -31,7 +31,7 @@ GtkWidget *label18, GtkWidget *label19, GtkWidget *label20) {
     int target_index = 0;
 
     // Open the file
-    file = fopen("testing.txt", "r");
+    file = fopen("output.txt", "r");
     if (file == NULL) {
         printf("Error Opening File.\n");
         return;
@@ -194,13 +194,11 @@ static void activate(GtkApplication *app, gpointer user_data) {
     labels[18] = Battery;
     labels[19] = BatteryPercent;
 
-    get_top_cpu_processes();
+        // Schedule periodic updates
+    g_timeout_add(2100, on_update_data, labels);
+        // Show the window
+    gtk_window_present(GTK_WINDOW(window)); 
 
-    // Schedule periodic updates
-    g_timeout_add(1000, on_update_data, labels);
-
-    // Show the window
-    gtk_window_present(GTK_WINDOW(window));
 }
 
 int main(int argc, char **argv) {
