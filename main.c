@@ -10,9 +10,7 @@ int main(int argc, char *argv[]) {
             "--help: Displays this text.\n";
         printf("%s", help);
     } else {
-        get_top_cpu_processes(); 
-        print_battery_status();  
+        get_top_processes();  
     }
     return 0;
 }
-
