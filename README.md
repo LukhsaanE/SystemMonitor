@@ -12,7 +12,7 @@ This app tracks CPU usage, RAM usage, and the battery life remaining on your com
 - Run `make usage_display` then run the command `./usage_display`
   
 ### Example usage
-https://github.com/Sam-Scott-McMaster/the-team-assignment-team-39/issues/1#issue-2721735276
+https://github.com/user-attachments/assets/98687040-ccc8-4075-9c51-9b6573774916
 
 ## Installations Needed
 The following needs to be downloaded be able to use the app. 
