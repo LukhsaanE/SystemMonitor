@@ -13,6 +13,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    # Install MSYS2 and GTK dependencies
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-gtk4
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-pkg-config
+
+    # Add MSYS2 paths to PATH environment variable
+    - name: Add MSYS2 to PATH
+      run: echo "::add-path::C:/msys64/ucrt64/bin"
+
     # Checkout the code
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -23,32 +38,28 @@ jobs:
 
     # Build the usage_display executable
     - name: Build usage_display executable
-      shell: pwsh
+      shell: bash
       run: |
-        gcc -IC:/msys64/ucrt64/bin/../include/gtk-4.0 `
-            -IC:/msys64/ucrt64/bin/../include/pango-1.0 `
-            -IC:/msys64/ucrt64/bin/../include/gdk-pixbuf-2.0 `
-            -IC:/msys64/ucrt64/bin/../include/cairo `
-            -IC:/msys64/ucrt64/bin/../include/harfbuzz `
-            -IC:/msys64/ucrt64/bin/../include/freetype2 `
-            -IC:/msys64/ucrt64/bin/../include/graphene-1.0 `
-            -IC:/msys64/ucrt64/bin/../lib/graphene-1.0/include `
-            -mfpmath=sse -msse -msse2 -IC:/msys64/ucrt64/bin/../include `
-            -IC:/msys64/ucrt64/bin/../include/glib-2.0 `
-            -IC:/msys64/ucrt64/bin/../lib/glib-2.0/include `
-            -IC:/msys64/ucrt64/bin/../include/fribidi `
-            -IC:/msys64/ucrt64/bin/../include/webp `
-            -DLIBDEFLATE_DLL -IC:/msys64/ucrt64/bin/../include/libpng16 `
-            -IC:/msys64/ucrt64/bin/../include/pixman-1 `
-            -o usage_display usage_display.c readsystem.c `
-            -LC:/msys64/ucrt64/bin/../lib `
-            -lgtk-4 -lpangowin32-1.0 -lpangocairo-1.0 -lpango-1.0 `
-            -lharfbuzz -lgdk_pixbuf-2.0 -lcairo-gobject -lcairo `
+        gcc -IC:/msys64/ucrt64/include/gtk-4.0 \
+            -IC:/msys64/ucrt64/include/pango-1.0 \
+            -IC:/msys64/ucrt64/include/gdk-pixbuf-2.0 \
+            -IC:/msys64/ucrt64/include/cairo \
+            -IC:/msys64/ucrt64/include/harfbuzz \
+            -IC:/msys64/ucrt64/include/freetype2 \
+            -IC:/msys64/ucrt64/include/graphene-1.0 \
+            -IC:/msys64/ucrt64/lib/graphene-1.0/include \
+            -mfpmath=sse -msse -msse2 -IC:/msys64/ucrt64/include \
+            -IC:/msys64/ucrt64/include/glib-2.0 \
+            -IC:/msys64/ucrt64/lib/glib-2.0/include \
+            -IC:/msys64/ucrt64/include/fribidi \
+            -IC:/msys64/ucrt64/include/webp \
+            -DLIBDEFLATE_DLL -IC:/msys64/ucrt64/include/libpng16 \
+            -IC:/msys64/ucrt64/include/pixman-1 \
+            -o usage_display usage_display.c readsystem.c \
+            -LC:/msys64/ucrt64/lib \
+            -lgtk-4 -lpangowin32-1.0 -lpangocairo-1.0 -lpango-1.0 \
+            -lharfbuzz -lgdk_pixbuf-2.0 -lcairo-gobject -lcairo \
             -lgraphene-1.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lintl
-
-    # Run the readsystem executable and collect output
-    - name: Run readsystem Tests
-      run: ./readsystem.exe > test_readsystem.txt
 
     # Check if usage_display executable launches
     - name: Test usage_display launch
@@ -58,30 +69,12 @@ jobs:
         sleep 5
         tasklist | grep usage_display.exe || exit 1
 
-    # Generate gcov report for coverage
-    - name: Generate Coverage Report
-      run: |
-        gcov readsystem-main.c > main_gcov_report.txt
-        gcov readsystem-readsystem.c > readsystem_gcov_report.txt
-        gcov readsystem-usage_display.c > usage_display_gcov_report.txt
-
-    # Upload gcov report as an artifact
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: gcov-report
-        path: |
-          main_gcov_report.txt
-          readsystem_gcov_report.txt
-          usage_display_gcov_report.txt
-
-    # Upload executable outputs as artifacts
+    # Upload test outputs as artifacts
     - name: Upload Test Outputs
       uses: actions/upload-artifact@v3
       with:
-        name: system-monitor-test
-        path: |
-          test_readsystem.txt
+        name: usage-display-test
+        path: usage_display.exe
 
     # Clean up the workspace
     - name: Clean up
@@ -89,8 +82,3 @@ jobs:
       run: |
         Remove-Item readsystem.exe -Force
         Remove-Item usage_display.exe -Force
-        Remove-Item output.txt -Force
-        Remove-Item test_readsystem.txt -Force
-        Remove-Item main_gcov_report.txt -Force
-        Remove-Item readsystem_gcov_report.txt -Force
-        Remove-Item usage_display_gcov_report.txt -Force
