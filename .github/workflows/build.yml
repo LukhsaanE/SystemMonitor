@@ -26,7 +26,7 @@ jobs:
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-gtk4
           mingw-w64-x86_64-pkg-config
-        msystem: mingw64
+        msystem: MINGW64
 
     # Ensure MSYS2 is prioritized in PATH
     - name: Update PATH for MSYS2
@@ -34,9 +34,11 @@ jobs:
         echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
         echo "C:/msys64/usr/bin" >> $GITHUB_PATH
 
-    # Verify pkg-config from MSYS2
-    - name: Verify pkg-config
-      run: where pkg-config
+    # Verify gcc and pkg-config availability
+    - name: Verify gcc and pkg-config
+      run: |
+        which gcc
+        which pkg-config
 
     # Build the readsystem executable
     - name: Build readsystem executable
@@ -47,8 +49,7 @@ jobs:
     - name: Build usage_display executable
       shell: bash
       run: |
-        export PATH=/usr/bin:/mingw64/bin:$PATH
-        /mingw64/bin/gcc $(/mingw64/bin/pkg-config --cflags gtk4) usage_display.c readsystem.c $(/mingw64/bin/pkg-config --libs gtk4) -o usage_display
+        gcc $(pkg-config --cflags gtk4) usage_display.c readsystem.c $(pkg-config --libs gtk4) -o usage_display
 
     # Test usage_display by ensuring the GUI opens
     - name: Test usage_display GUI
