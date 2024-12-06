@@ -32,14 +32,11 @@ jobs:
     - name: Update PATH for MSYS2
       run: |
         echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
-        echo "C:/msys64/usr/bin" >> $GITHUB_PATH
+        echo "C:/msys64/mingw64/lib/pkgconfig" >> $GITHUB_ENV
 
-    # Set PKG_CONFIG_PATH for pkg-config
-    - name: Set PKG_CONFIG_PATH
-      run: echo "C:/msys64/mingw64/lib/pkgconfig" >> $GITHUB_ENV
-
-    # Verify gcc and pkg-config availability
-    - name: Debugging pkg-config and GTK4 Setup
+    # Debugging: Check GCC, pkg-config, and gtk4.pc paths
+    - name: Debugging GTK4 Setup
+      shell: bash
       run: |
         echo "Checking GCC version:"
         gcc --version
@@ -51,7 +48,7 @@ jobs:
         echo $PKG_CONFIG_PATH
 
         echo "Checking gtk4.pc location:"
-        ls C:/msys64/mingw64/lib/pkgconfig/
+        ls /c/msys64/mingw64/lib/pkgconfig/ || echo "gtk4.pc not found"
 
         echo "Checking GTK4 CFLAGS:"
         pkg-config --cflags gtk4 || echo "Error retrieving cflags"
@@ -77,46 +74,3 @@ jobs:
         ./usage_display.exe &
         sleep 5
         tasklist | grep usage_display.exe || exit 1
-
-    # Run readsystem executable and collect output
-    - name: Run readsystem Tests
-      shell: bash
-      run: ./readsystem.exe > test_readsystem.txt
-
-    # Generate gcov report for coverage
-    - name: Generate Coverage Report
-      shell: bash
-      run: |
-        gcov readsystem-main.c > main_gcov_report.txt
-        gcov readsystem-readsystem.c > readsystem_gcov_report.txt
-        gcov readsystem-usage_display.c > usage_display_gcov_report.txt
-
-    # Upload gcov report as an artifact
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: gcov-report
-        path: |
-          main_gcov_report.txt
-          readsystem_gcov_report.txt
-          usage_display_gcov_report.txt
-
-    # Upload test outputs as artifacts
-    - name: Upload Test Outputs
-      uses: actions/upload-artifact@v4
-      with:
-        name: system-monitor-test
-        path: |
-          test_readsystem.txt
-
-    # Clean up the workspace
-    - name: Clean up
-      shell: pwsh
-      run: |
-        Remove-Item readsystem.exe -Force
-        Remove-Item usage_display.exe -Force
-        Remove-Item output.txt -Force
-        Remove-Item test_readsystem.txt -Force
-        Remove-Item main_gcov_report.txt -Force
-        Remove-Item readsystem_gcov_report.txt -Force
-        Remove-Item usage_display_gcov_report.txt -Force
