@@ -1,35 +1,32 @@
 # Compiler
 CC = gcc
 
-# Executable name
+# Executable names
 EXEC = readsystem
+TARGET = usage_display
 
-# Source files
+# Source files for system monitor
 SRC = main.c readsystem.c
 
-# Default target to build the executable
+# Source files for usage display
+SRC2 = usage_display.c readsystem.c
+
+# GTK Flags
+CFLAGS = $(shell pkg-config --cflags gtk4)
+LDFLAGS = $(shell pkg-config --libs gtk4)
+
+# Default target to build the system monitor executable
 $(EXEC): $(SRC)
 	$(CC) -fprofile-arcs -ftest-coverage -o $(EXEC) $(SRC)
 
-# Run the program and redirect output to output.txt
+# Build the usage display with GTK
+$(TARGET): $(SRC2)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC2) $(LDFLAGS)
+
+# Run the system monitor and redirect output
 run: $(EXEC)
 	$(EXEC) > output.txt
 
-# Clean up the executable and output file
+# Clean up build artifacts
 clean:
-	rm -f $(EXEC).exe output.txt
-
-#This is for usage display
-# Variables
-CFLAGS = $(shell pkg-config --cflags gtk4)
-LDFLAGS = $(shell pkg-config --libs gtk4)
-TARGET = usage_display
-SRC2 = usage_display.c
-
-# Default target
-all: $(TARGET)
-
-# Compilation rule
-$(TARGET): $(SRC2)
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
+	rm -f $(EXEC).exe $(TARGET).exe output.txt *.gcda *.gcno
