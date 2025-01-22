@@ -1,4 +1,4 @@
-/* Lukhsaan (elankuml), Jodh (gillj118), Date: December 5, 2024
+/* Lukhsaan, Jodh, Date: December 5, 2024
 *
 * This program prints the top 5 app that use the most RAM and CPU, gives their stats and prints the battery life of the computer
 */
