@@ -21,8 +21,4 @@ The following needs to be downloaded be able to use the app.
 - [GTK Installation](https://www.gtk.org/docs/installations/windows#using-gtk-from-msys2-packages)
 - [GCC with MinGW](https://code.visualstudio.com/docs/cpp/config-mingw)
 
-## Testing the app
-- The app could not be conventially tested with specific inputs and outputs, as the outpus are constantly changing.
-- The way we decided to test it is matching up the specific stats with the task manager for Windows. 
-- This way we could find out if the outputs were actually accurate.
 
